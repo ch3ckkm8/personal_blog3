@@ -6,8 +6,8 @@
   <meta name="viewport"
     content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no, viewport-fit=cover">
 
-  <title>Awesome Docsify Site</title>
-  <meta name="description" content="An awesome docsify site for publishing some content on the web.">
+  <title>Docsify Site</title>
+  <meta name="description" content="Docsify with robust dynamic outline, dark mode, and sidebar" />
 
   <!-- Default Theme -->
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" id="theme-link">
@@ -19,34 +19,75 @@
   <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-javascript.min.js"></script>
 
-  <!-- Styles -->
   <style>
-    /* Right-side TOC container */
-    #toc {
+    /* ---------- Right-side TOC ---------- */
+    #outline {
       position: fixed;
-      top: 80px;
-      right: 10px;
-      width: 250px;
-      max-height: 80%;
+      top: 72px;
+      right: 12px;
+      width: 260px;
+      max-height: 80vh;
       overflow-y: auto;
-      background: rgba(250, 250, 250, 0.9);
-      padding: 10px;
-      border-radius: 6px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      z-index: 999;
+      background: rgba(250, 250, 250, 0.75);
+      padding: 10px 12px;
+      border-radius: 8px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
       font-size: 14px;
+      z-index: 999;
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
-    body.dark #toc {
-      background: rgba(30, 30, 30, 0.9);
+    body.dark #outline {
+      background: rgba(30, 30, 30, 0.7);
       color: #ddd;
     }
 
-    /* Floating buttons */
-    #dark-mode-btn,
-    #back-to-top-btn {
+    #outline.collapsed {
+      opacity: 0.3;
+      pointer-events: none;
+      transform: translateX(20px);
+    }
+
+    #outline .outline-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      opacity: 0.8;
+      cursor: pointer;
+    }
+
+    #outline a {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      padding: 4px 0;
+      border-left: 2px solid transparent;
+      transition: border-color .15s ease, color .15s ease;
+    }
+
+    #outline a:hover {
+      color: #42b983;
+    }
+
+    #outline a.active {
+      color: #42b983;
+      border-left-color: #42b983;
+      font-weight: 600;
+    }
+
+    /* Indent by heading level */
+    #outline a[data-level="1"] { margin-left: 0; }
+    #outline a[data-level="2"] { margin-left: 8px; }
+    #outline a[data-level="3"] { margin-left: 16px; }
+    #outline a[data-level="4"] { margin-left: 24px; }
+    #outline a[data-level="5"] { margin-left: 32px; }
+    #outline a[data-level="6"] { margin-left: 40px; }
+
+    /* ---------- Floating Buttons ---------- */
+    #dark-mode-btn, #back-to-top-btn {
       position: fixed;
-      right: 10px;
+      right: 12px;
       z-index: 9999;
       border: none;
       background-color: #4a4a4a;
@@ -57,12 +98,12 @@
       font-size: 18px;
     }
 
-    #dark-mode-btn {
-      bottom: 10px;
-    }
+    #dark-mode-btn { bottom: 10px; }
+    #back-to-top-btn { bottom: 50px; }
 
-    #back-to-top-btn {
-      bottom: 50px;
+    /* ---------- Responsive ---------- */
+    @media (max-width: 1200px) {
+      #outline { display: none; }
     }
   </style>
 </head>
@@ -70,75 +111,97 @@
 <body>
   <div id="app"></div>
 
-  <!-- Right-side Table of Contents -->
-  <div id="toc"></div>
+  <!-- Right-side Outline -->
+  <nav id="outline">
+    <div class="outline-title" id="outline-title">On this page ▼</div>
+    <!-- links injected dynamically -->
+  </nav>
 
-  <!-- Floating Buttons -->
-  <button id="dark-mode-btn" onclick="toggleDarkMode()">🌓</button>
+  <!-- Buttons -->
+  <button id="dark-mode-btn" title="Toggle dark mode">🌓</button>
   <button id="back-to-top-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆️</button>
 
-  <script>
-    // Docsify Configuration
-    window.$docsify = {
-      name: 'Simple Docsify Template',
-      auto2top: true,
-      loadSidebar: true,
-      subMaxLevel: 6,
-      search: {
-        placeholder: 'Type to search',
-        noData: 'No matches found.',
-        depth: 2
-      }
-    };
-  </script>
-
-  <!-- Docsify Core -->
-  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
-
-  <!-- Plugins -->
-  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
-
-  <!-- Dark Mode Toggle -->
+  <!-- Dark Mode -->
   <script>
     const themeLink = document.getElementById('theme-link');
     let darkMode = false;
-
     function toggleDarkMode() {
-      if (!darkMode) {
-        themeLink.href = '//cdn.jsdelivr.net/npm/docsify@4/lib/themes/dark.css';
-      } else {
-        themeLink.href = '//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css';
-      }
-      darkMode = !darkMode;
-      document.body.classList.toggle('dark', darkMode);
-      document.getElementById('toc').classList.toggle('dark', darkMode);
+      darkMode = document.body.classList.toggle('dark');
+      document.getElementById('outline').classList.toggle('dark', darkMode);
+      if (darkMode) themeLink.href = '//cdn.jsdelivr.net/npm/docsify@4/lib/themes/dark.css';
+      else themeLink.href = '//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css';
     }
   </script>
 
-  <!-- TOC Generator -->
+  <!-- Docsify Config -->
   <script>
-    function generateTOC() {
-      const tocContainer = document.getElementById('toc');
-      tocContainer.innerHTML = '<strong>On this page</strong><br>';
+    window.$docsify = {
+      name: 'Docsify Dynamic Outline Site',
+      auto2top: true,
+      loadSidebar: true,
+      subMaxLevel: 6,
+      search: { placeholder: 'Type to search', noData: 'No matches found', depth: 6 }
+    };
+  </script>
 
-      const headers = document.querySelectorAll('#app h1, #app h2, #app h3, #app h4, #app h5, #app h6');
-      headers.forEach(header => {
-        if (!header.id) header.id = header.textContent.trim().replace(/\s+/g, '-');
+  <!-- Docsify Core & Plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
+
+  <!-- Dynamic Outline Script -->
+  <script>
+    function slugify(text){ return text.trim().toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-'); }
+
+    function buildOutline() {
+      const container = document.getElementById('outline');
+      if (!container) return;
+
+      // Clear previous links
+      container.querySelectorAll('a').forEach(a => a.remove());
+
+      // Gather headers from rendered markdown
+      const headers = document.querySelectorAll('#app .markdown-section h1,h2,h3,h4,h5,h6');
+
+      headers.forEach(h => {
+        if (!h.id) h.id = slugify(h.textContent);
 
         const link = document.createElement('a');
-        link.href = `#/${location.hash.replace('#/', '')}?id=${header.id}`;
-        link.textContent = header.textContent;
-        link.style.display = 'block';
-        link.style.marginLeft = (parseInt(header.tagName[1]) - 1) * 10 + 'px';
-        tocContainer.appendChild(link);
+        link.textContent = h.textContent;
+        link.href = `#${h.id}`;
+        link.dataset.level = h.tagName.substring(1);
+        link.onclick = (e) => {
+          e.preventDefault();
+          document.getElementById(h.id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+          history.replaceState(null, '', `#${h.id}`);
+        };
+        container.appendChild(link);
       });
+
+      // Highlight current header
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const link = container.querySelector(`a[href="#${entry.target.id}"]`);
+          if (!link) return;
+          if (entry.isIntersecting) {
+            container.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+            link.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-60% 0px -30% 0px', threshold: 0 });
+
+      headers.forEach(h => observer.observe(h));
     }
 
-    window.$docsify.plugins = [].concat(window.$docsify.plugins || [], function (hook, vm) {
-      hook.doneEach(function () {
-        generateTOC();
-      });
+    // Rebuild outline after each Docsify render
+    window.$docsify.plugins = [].concat(window.$docsify.plugins || [], function(hook) {
+      hook.doneEach(() => setTimeout(buildOutline, 50));
+    });
+
+    // Collapsible TOC on small screen hover or click
+    const outlineTitle = document.getElementById('outline-title');
+    outlineTitle.addEventListener('click', () => {
+      document.getElementById('outline').classList.toggle('collapsed');
     });
   </script>
 </body>
