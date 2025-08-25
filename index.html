@@ -11,147 +11,49 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
 
   <style>
-    /* ---------- Color System (light / dark via CSS vars) ---------- */
-    :root{
-      --bg: #ffffff;
-      --text: #2c3e50;
-      --muted: #6b778d;
-      --link: #2d8f6f;
-      --border: #e6e9ef;
-      --code-bg: #f6f8fa;
-
-      --sidebar-bg: #ffffff;
-      --sidebar-fg: #2c3e50;
-      --sidebar-border: #e6e9ef;
-
-      --outline-bg: rgba(250,250,250,0.85);
-      --outline-fg: #2c3e50;
-      --outline-border: #e6e9ef;
-      --outline-active: #2d8f6f;
-    }
-    body.dark{
-      --bg: #0f1113;
-      --text: #e6e6e6;
-      --muted: #a6abb2;
-      --link: #7bdcb5;
-      --border: #222426;
-      --code-bg: #141414;
-
-      --sidebar-bg: #0d0f10;
-      --sidebar-fg: #e6e6e6;
-      --sidebar-border: #222426;
-
-      --outline-bg: rgba(18,18,18,0.5);
-      --outline-fg: #e6e6e6;
-      --outline-border: #222426;
-      --outline-active: #7bdcb5;
-    }
-
-    /* ---------- Base ---------- */
-    body{
-      background: var(--bg);
-      color: var(--text);
-      transition: background .18s ease, color .18s ease;
-    }
-    a { color: var(--link); }
-
-    /* IMPORTANT: do NOT force descendant colors inside markdown-section.
-       That would override Prism token colors. */
-    body .content,
-    body .markdown-section,
-    body .content > .markdown-section {
-      background: transparent !important;
-      /* removed: color: inherit !important; */
-    }
-
     /* ---------- Code blocks & inline code ---------- */
-    .markdown-section {
-      background-color: var(--bg) !important;
-      color: var(--text) !important; /* sets base text color; Prism tokens still override within <pre><code> */
-    }
     .markdown-section pre,
     .markdown-section pre > code {
       background: var(--code-bg) !important;
       border: 1px solid var(--border) !important;
-      /* DO NOT set color here; let Prism style the tokens */
+      border-radius: 6px !important;   /* rounded corners like GitHub */
+      padding: 12px !important;        /* more breathing space */
+      overflow-x: auto;
     }
+    
+    /* inline code */
     .markdown-section code:not(pre code) {
       background: var(--code-bg) !important;
       border: 1px solid var(--border) !important;
-      color: var(--text) !important; /* inline code uses theme text */
-      padding: 2px 4px;
       border-radius: 4px;
+      padding: 2px 5px;
+      font-size: 90%;
+      color: var(--text) !important;
     }
-
-    /* ---------- Left Sidebar ---------- */
-    .sidebar {
-      background: var(--sidebar-bg);
-      color: var(--sidebar-fg);
-      border-right: 1px solid var(--sidebar-border);
-    }
-    .sidebar .app-name, .app-name-link, .sidebar .app-name-link {
-      color: var(--sidebar-fg) !important;
-    }
-    .sidebar .sidebar-nav a {
-      color: var(--sidebar-fg) !important;
-    }
-    .sidebar .sidebar-nav li.active > a {
-      color: var(--outline-active) !important;
+    
+    /* ---------- Headings ---------- */
+    .markdown-section h1,
+    .markdown-section h2,
+    .markdown-section h3,
+    .markdown-section h4,
+    .markdown-section h5,
+    .markdown-section h6 {
       font-weight: 600;
+      line-height: 1.4;
+      margin-top: 1.6em;
+      margin-bottom: 0.6em;
+    }
+    
+    /* Dark mode headings – higher contrast bluish tone */
+    body.dark .markdown-section h1,
+    body.dark .markdown-section h2,
+    body.dark .markdown-section h3,
+    body.dark .markdown-section h4,
+    body.dark .markdown-section h5,
+    body.dark .markdown-section h6 {
+      color: #58a6ff !important;  /* GitHub-like light blue */
     }
 
-    /* ---------- Right Outline ---------- */
-    #outline {
-      position: fixed;
-      top: 72px;
-      right: 12px;
-      width: 300px;
-      max-height: calc(100vh - 96px);
-      overflow-y: auto;
-      background: var(--outline-bg);
-      color: var(--outline-fg);
-      border: 1px solid var(--outline-border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      box-shadow: 0 6px 22px rgba(0,0,0,.08);
-      z-index: 999;
-      font-size: 14px;
-      transition: background .18s ease, color .18s ease;
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-    }
-    #outline .outline-title{ font-size:12px; font-weight:700; text-transform:uppercase; opacity:.8; margin-bottom:8px; }
-    #outline .outline-loading { color: var(--muted); font-size:13px; margin:8px 0; }
-    #outline a { display:block; color:inherit; text-decoration:none; padding:4px 0; border-left:2px solid transparent; transition:color .12s, border-color .12s; }
-    #outline a:hover { color:var(--outline-active); }
-    #outline a.active { color:var(--outline-active); border-left-color:var(--outline-active); font-weight:600; }
-
-    #outline a[data-level="1"]{ margin-left:0; }
-    #outline a[data-level="2"]{ margin-left:8px; }
-    #outline a[data-level="3"]{ margin-left:16px; }
-    #outline a[data-level="4"]{ margin-left:24px; }
-    #outline a[data-level="5"]{ margin-left:32px; }
-    #outline a[data-level="6"]{ margin-left:40px; }
-
-    @media (max-width: 1200px){ #outline{ display:none; } }
-
-    /* ---------- Floating Buttons ---------- */
-    #back-to-top-btn, #dark-mode-btn{
-      position: fixed;
-      right: 16px;
-      z-index: 1200;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      background: var(--code-bg);
-      color: var(--text);
-      box-shadow: 0 4px 14px rgba(0,0,0,.08);
-      border: 1px solid var(--border);
-    }
-    #back-to-top-btn{ bottom: 16px; }
-    #dark-mode-btn{ bottom: 62px; }
-    #back-to-top-btn.hidden { display:none; }
   </style>
 </head>
 <body>
