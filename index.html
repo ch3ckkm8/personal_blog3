@@ -1,197 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   <meta name="viewport"
-    content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no, viewport-fit=cover">
-
+        content="width=device-width, initial-scale=1.0, shrink-to-fit=no, viewport-fit=cover" />
   <title>Docsify Site</title>
-  <meta name="description" content="Docsify with robust dynamic outline, dark mode, and sidebar" />
+  <meta name="description" content="Docsify with robust dynamic outline (h1-h6), dark mode, and sidebar" />
 
-  <!-- Default Theme -->
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" id="theme-link">
-
-  <!-- Prism.js for syntax highlighting -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css" />
-  <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-bash.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-javascript.min.js"></script>
+  <!-- Docsify Vue theme -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
 
   <style>
-    /* ---------- Right-side TOC ---------- */
+    /* ---------- Color System (light / dark via CSS vars) ---------- */
+    :root{
+      --bg: #ffffff;
+      --text: #2c3e50;
+      --muted: #6b778d;
+      --link: #2d8f6f;
+      --border: #e6e9ef;
+      --code-bg: #f6f8fa;
+
+      --sidebar-bg: #ffffff;
+      --sidebar-fg: #2c3e50;
+      --sidebar-border: #e6e9ef;
+
+      --outline-bg: rgba(250,250,250,0.85);
+      --outline-fg: #2c3e50;
+      --outline-border: #e6e9ef;
+      --outline-active: #2d8f6f;
+    }
+    body.dark{
+      --bg: #0f1113;
+      --text: #e6e6e6;
+      --muted: #a6abb2;
+      --link: #7bdcb5;
+      --border: #222426;
+      --code-bg: #141414;
+
+      --sidebar-bg: #0d0f10;
+      --sidebar-fg: #e6e6e6;
+      --sidebar-border: #222426;
+
+      --outline-bg: rgba(18,18,18,0.5);
+      --outline-fg: #e6e6e6;
+      --outline-border: #222426;
+      --outline-active: #7bdcb5;
+    }
+
+    /* ---------- Base (ensure content uses the variables) ---------- */
+    body{
+      background: var(--bg);
+      color: var(--text);
+      transition: background .18s ease, color .18s ease;
+    }
+    a { color: var(--link); }
+
+    /* Override main rendered content colors (Docsify theme sometimes sets bg/fg) */
+    body .content,
+    body .markdown-section,
+    body .content > .markdown-section,
+    body .content .markdown-section * {
+      background: transparent !important;
+      color: inherit !important;
+    }
+
+    /* Specifically set markdown-section backgrounds and code-blocks to match variables */
+    .markdown-section {
+      background-color: var(--bg) !important;
+      color: var(--text) !important;
+    }
+    .markdown-section pre, .markdown-section pre > code {
+      background: var(--code-bg) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text) !important;
+    }
+    .markdown-section code:not(pre code) {
+      background: var(--code-bg) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text) !important;
+    }
+
+    /* ---------- Left Sidebar (dark-mode aware) ---------- */
+    .sidebar {
+      background: var(--sidebar-bg);
+      color: var(--sidebar-fg);
+      border-right: 1px solid var(--sidebar-border);
+    }
+    .sidebar .app-name, .app-name-link, .sidebar .app-name-link {
+      color: var(--sidebar-fg) !important;
+    }
+    .sidebar .sidebar-nav a {
+      color: var(--sidebar-fg) !important;
+    }
+    .sidebar .sidebar-nav li.active > a {
+      color: var(--outline-active) !important;
+      font-weight: 600;
+    }
+
+    /* ---------- Right Outline ---------- */
     #outline {
       position: fixed;
       top: 72px;
       right: 12px;
-      width: 260px;
-      max-height: 80vh;
+      width: 300px;
+      max-height: calc(100vh - 96px);
       overflow-y: auto;
-      background: rgba(250, 250, 250, 0.9);
+      background: var(--outline-bg);
+      color: var(--outline-fg);
+      border: 1px solid var(--outline-border);
+      border-radius: 10px;
       padding: 10px 12px;
-      border-radius: 8px;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-      font-size: 14px;
+      box-shadow: 0 6px 22px rgba(0,0,0,.08);
       z-index: 999;
+      font-size: 14px;
+      transition: background .18s ease, color .18s ease;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
+    #outline .outline-title{ font-size:12px; font-weight:700; text-transform:uppercase; opacity:.8; margin-bottom:8px; }
+    #outline .outline-loading { color: var(--muted); font-size:13px; margin:8px 0; }
+    #outline a { display:block; color:inherit; text-decoration:none; padding:4px 0; border-left:2px solid transparent; transition:color .12s, border-color .12s; }
+    #outline a:hover { color:var(--outline-active); }
+    #outline a.active { color:var(--outline-active); border-left-color:var(--outline-active); font-weight:600; }
 
-    body.dark #outline {
-      background: rgba(30, 30, 30, 0.85);
-      color: #ddd;
-    }
+    /* Indent for levels 1..6 */
+    #outline a[data-level="1"]{ margin-left:0; }
+    #outline a[data-level="2"]{ margin-left:8px; }
+    #outline a[data-level="3"]{ margin-left:16px; }
+    #outline a[data-level="4"]{ margin-left:24px; }
+    #outline a[data-level="5"]{ margin-left:32px; }
+    #outline a[data-level="6"]{ margin-left:40px; }
 
-    #outline .outline-title {
-      font-weight: 700;
-      margin-bottom: 8px;
-      font-size: 12px;
-      text-transform: uppercase;
-      opacity: 0.8;
-    }
-
-    #outline a {
-      display: block;
-      text-decoration: none;
-      color: inherit;
-      padding: 4px 0;
-      border-left: 2px solid transparent;
-      transition: border-color .15s ease, color .15s ease;
-    }
-
-    #outline a:hover {
-      color: #42b983;
-    }
-
-    #outline a.active {
-      color: #42b983;
-      border-left-color: #42b983;
-      font-weight: 600;
-    }
-
-    /* Indent by heading level */
-    #outline a[data-level="1"] { margin-left: 0; }
-    #outline a[data-level="2"] { margin-left: 8px; }
-    #outline a[data-level="3"] { margin-left: 16px; }
-    #outline a[data-level="4"] { margin-left: 24px; }
-    #outline a[data-level="5"] { margin-left: 32px; }
-    #outline a[data-level="6"] { margin-left: 40px; }
+    @media (max-width: 1200px){ #outline{ display:none; } }
 
     /* ---------- Floating Buttons ---------- */
-    #dark-mode-btn, #back-to-top-btn {
+    #back-to-top-btn, #dark-mode-btn{
       position: fixed;
-      right: 12px;
-      z-index: 9999;
+      right: 16px;
+      z-index: 1200;
       border: none;
-      background-color: #4a4a4a;
-      color: white;
       padding: 8px 12px;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 18px;
+      background: var(--code-bg);
+      color: var(--text);
+      box-shadow: 0 4px 14px rgba(0,0,0,.08);
+      border: 1px solid var(--border);
     }
-
-    #dark-mode-btn { bottom: 10px; }
-    #back-to-top-btn { bottom: 50px; }
-
-    /* Hide outline on small screens */
-    @media (max-width: 1200px) {
-      #outline { display: none; }
-    }
+    #back-to-top-btn{ bottom: 16px; }
+    #dark-mode-btn{ bottom: 62px; }
+    #back-to-top-btn.hidden { display:none; }
   </style>
 </head>
-
 <body>
   <div id="app"></div>
 
   <!-- Right-side Outline -->
-  <nav id="outline">
+  <nav id="outline" aria-label="On this page" role="navigation">
     <div class="outline-title">On this page</div>
-    <!-- Links will be injected dynamically -->
+    <div class="outline-loading">Loading…</div>
   </nav>
 
   <!-- Buttons -->
+  <button id="back-to-top-btn" class="hidden" title="Back to top">⬆️</button>
   <button id="dark-mode-btn" title="Toggle dark mode">🌓</button>
-  <button id="back-to-top-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆️</button>
 
-  <!-- Dark Mode -->
+  <!-- Init theme from preference -->
   <script>
-    const themeLink = document.getElementById('theme-link');
-    let darkMode = false;
-    document.getElementById('dark-mode-btn').addEventListener('click', () => {
-      darkMode = document.body.classList.toggle('dark');
-      document.getElementById('outline').classList.toggle('dark', darkMode);
-      themeLink.href = darkMode
-        ? '//cdn.jsdelivr.net/npm/docsify@4/lib/themes/dark.css'
-        : '//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css';
-    });
+    (function initThemeFromStorage() {
+      try {
+        const pref = localStorage.getItem('ds_dark');
+        if (pref === '1' || (!pref && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.body.classList.add('dark');
+        }
+      } catch (e) { /* ignore */ }
+    })();
   </script>
 
-  <!-- Docsify Config -->
+  <!-- Docsify config -->
   <script>
     window.$docsify = {
-      name: 'Docsify Dynamic Outline Site',
+      name: 'Dynamic Docsify Site',
       auto2top: true,
-      loadSidebar: true,
       subMaxLevel: 6,
+      loadSidebar: true,
+      autoSidebar: true,
       search: { placeholder: 'Type to search', noData: 'No matches found', depth: 6 }
     };
   </script>
 
-  <!-- Docsify Core & Plugins -->
+  <!-- Docsify core + plugins -->
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-auto-sidebar/dist/docsify-auto-sidebar.min.js"></script>
 
-  <!-- Dynamic Outline Script -->
   <script>
+    /* ---------- UI helpers ---------- */
+    const backBtn = document.getElementById('back-to-top-btn');
+    window.addEventListener('scroll', () => {
+      if (document.documentElement.scrollTop > 200 || window.scrollY > 200) {
+        backBtn.classList.remove('hidden');
+      } else {
+        backBtn.classList.add('hidden');
+      }
+    });
+    backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    /* Dark mode toggle + persist */
+    (function attachDarkToggle(){
+      const btn = document.getElementById('dark-mode-btn');
+      const setLabel = () => { btn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌓'; };
+      btn.addEventListener('click', () => {
+        const isDark = document.body.classList.toggle('dark');
+        try { localStorage.setItem('ds_dark', isDark ? '1' : '0'); } catch(e) {}
+        setLabel();
+        // rebuild outline so colors update immediately
+        try { buildOutlineOnce(0); } catch(_) {}
+      });
+      setLabel();
+    })();
+  </script>
+
+  <script>
+    /* ---------- Robust outline builder (h1-h6) ---------- */
+    let outlineObserver = null;
+
     function slugify(text) {
-      return text.trim().toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+      return (text || '').trim().toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
     }
 
-    function buildOutline() {
+    function isInsideSidebar(node) {
+      return !!node && !!node.closest && !!node.closest('.sidebar');
+    }
+
+    function gatherHeaders() {
+      // Candidate containers where Docsify injects content
+      const candidates = [
+        document.querySelector('.markdown-section'),
+        document.querySelector('.content'),
+        document.querySelector('#main'),
+        document.querySelector('article'),
+        document.querySelector('.main'),
+        document.getElementById('app')
+      ];
+      for (const root of candidates) {
+        if (!root) continue;
+        const hs = Array.from(root.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+        const filtered = hs.filter(h => !isInsideSidebar(h) && !h.closest('#outline'));
+        if (filtered.length) return filtered;
+      }
+      // fallback: any headers in document (excluding sidebar/outline)
+      const fallback = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6')).filter(h => !isInsideSidebar(h) && !h.closest('#outline'));
+      return fallback;
+    }
+
+    function clearOutlineLinks(container) {
+      container.querySelectorAll('a').forEach(a => a.remove());
+    }
+
+    function currentRouteWithoutHash() {
+      // returns e.g. "/some/path" (no leading '#')
+      const h = location.hash || '';
+      // remove leading '#'
+      const s = h.slice(1);
+      // take portion before any inner '#'
+      return s.split('#')[0] || '';
+    }
+
+    function buildOutlineOnce(attempt = 0) {
       const container = document.getElementById('outline');
       if (!container) return;
 
-      // Clear previous links
-      container.querySelectorAll('a').forEach(a => a.remove());
+      // show temporary loading
+      container.querySelectorAll('.outline-loading').forEach(n => n.remove());
+      const loading = document.createElement('div'); loading.className = 'outline-loading'; loading.textContent = 'Loading…';
+      container.appendChild(loading);
 
-      // Get headers from Docsify-rendered markdown
-      const headers = document.querySelectorAll('#app .markdown-section h1,h2,h3,h4,h5,h6');
+      const headers = gatherHeaders();
+
+      if (!headers.length) {
+        // retry a few times (Docsify injects content async)
+        if (attempt < 40) return setTimeout(() => buildOutlineOnce(attempt + 1), 50);
+        // no headers: clear links, show message
+        clearOutlineLinks(container);
+        loading.textContent = 'No headings found.';
+        return;
+      }
+
+      // build links
+      clearOutlineLinks(container);
+      loading.remove();
+
+      const usedIds = new Set();
+      const linkEntries = [];
 
       headers.forEach(h => {
-        if (!h.id) h.id = slugify(h.textContent);
+        const text = (h.textContent || h.innerText || '').trim();
+        if (!text) return;
 
-        const link = document.createElement('a');
-        link.textContent = h.textContent;
-        link.href = `#${h.id}`;
-        link.dataset.level = h.tagName.substring(1);
-        link.onclick = (e) => {
-          e.preventDefault();
-          document.getElementById(h.id).scrollIntoView({ behavior: 'smooth', block: 'start' });
-          history.replaceState(null, '', `#${h.id}`);
-        };
-        container.appendChild(link);
+        // ensure unique id
+        if (!h.id) {
+          let base = slugify(text) || 'heading';
+          let uid = base; let i = 1;
+          while (usedIds.has(uid) || document.getElementById(uid)) { uid = base + '-' + (i++); }
+          h.id = uid;
+          usedIds.add(uid);
+        } else {
+          usedIds.add(h.id);
+        }
+
+        const level = Math.min(6, Math.max(1, parseInt(h.tagName.substring(1), 10) || 1));
+        const a = document.createElement('a');
+        a.setAttribute('href', 'javascript:void(0)');
+        a.setAttribute('data-target', h.id);
+        a.setAttribute('data-level', String(level));
+        a.textContent = text;
+        a.style.display = 'block';
+        a.style.marginLeft = (level - 1) * 8 + 'px';
+        container.appendChild(a);
+
+        linkEntries.push({ link: a, header: h });
       });
 
-      // Highlight current header
-      const observer = new IntersectionObserver((entries) => {
+      // click delegate: construct docsify-friendly hash (#/route#id) and scroll smoothly
+      container.onclick = function (e) {
+        const a = e.target.closest && e.target.closest('a[data-target]');
+        if (!a) return;
+        const id = a.getAttribute('data-target');
+        const header = document.getElementById(id);
+        if (!header) return;
+        // compute current route (without leading '#')
+        const route = currentRouteWithoutHash(); // e.g. "/path"
+        const newHash = route ? (route + '#' + id) : id;
+        try {
+          // set URL like: https://host/...#<route>#<id>
+          const base = location.href.split('#')[0];
+          history.replaceState(null, '', base + '#' + newHash);
+        } catch (_) {}
+        // smooth scroll to target
+        header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // set active class immediately
+        container.querySelectorAll('a').forEach(x => x.classList.remove('active'));
+        a.classList.add('active');
+      };
+
+      // observe headers for active highlighting
+      if (outlineObserver) outlineObserver.disconnect();
+      const map = {};
+      const observed = [];
+      linkEntries.forEach(item => {
+        map[item.header.id] = item.link;
+        observed.push(item.header);
+      });
+
+      if (!observed.length) return;
+
+      outlineObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-          const link = container.querySelector(`a[href="#${entry.target.id}"]`);
+          const id = entry.target.id;
+          const link = map[id];
           if (!link) return;
           if (entry.isIntersecting) {
-            container.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+            // clear and set active
+            container.querySelectorAll('a').forEach(x => x.classList.remove('active'));
             link.classList.add('active');
           }
         });
-      }, { rootMargin: '-60% 0px -30% 0px', threshold: 0 });
+      }, { root: null, rootMargin: '0px 0px -65% 0px', threshold: 0.05 });
 
-      headers.forEach(h => observer.observe(h));
+      observed.forEach(h => outlineObserver.observe(h));
+
+      // initial highlight: respect hash or top-most visible header
+      setTimeout(() => {
+        const rawHash = (location.hash || '').slice(1);
+        const afterRoute = rawHash.split('#')[1] || rawHash.split('#')[0] || '';
+        if (afterRoute) {
+          const targetLink = map[afterRoute];
+          if (targetLink) { container.querySelectorAll('a').forEach(x => x.classList.remove('active')); targetLink.classList.add('active'); return; }
+        }
+        for (const h of observed) {
+          const r = h.getBoundingClientRect();
+          if (r.top >= 0 && r.top < window.innerHeight * 0.7) {
+            const l = map[h.id];
+            if (l) { container.querySelectorAll('a').forEach(x => x.classList.remove('active')); l.classList.add('active'); break; }
+          }
+        }
+      }, 120);
     }
 
-    // Rebuild outline after each Docsify render
-    window.$docsify.plugins = [].concat(window.$docsify.plugins || [], function (hook) {
-      hook.doneEach(() => setTimeout(buildOutline, 50));
-    });
+    /* inject plugin so buildOutlineOnce runs after docsify rendering */
+    (function injectOutlinePlugin() {
+      const orig = window.$docsify.plugins || [];
+      window.$docsify.plugins = [].concat(orig, function (hook, vm) {
+        hook.doneEach(function () {
+          // slight delay so other plugins (autoSidebar, anchors) finish
+          setTimeout(() => buildOutlineOnce(0), 60);
+        });
+      });
+    })();
+
+    /* Rebuild on hashchange + resize */
+    window.addEventListener('hashchange', () => setTimeout(() => buildOutlineOnce(0), 80));
+    window.addEventListener('resize', () => setTimeout(() => buildOutlineOnce(0), 120));
+  </script>
+
+  <script>
+    /* --- Robust auto-rebuild: MutationObserver + image-load + initial load --- */
+    (function enableOutlineAutoRebuild() {
+      if (typeof buildOutlineOnce !== 'function') return;
+
+      function debounce(fn, wait = 80) {
+        let t;
+        return function(...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), wait); };
+      }
+
+      function locateContentRoot() {
+        return document.querySelector('.markdown-section')
+          || document.querySelector('.content')
+          || document.querySelector('#main')
+          || document.querySelector('article')
+          || document.querySelector('.main')
+          || document.getElementById('app');
+      }
+
+      const debouncedBuild = debounce(() => buildOutlineOnce(0), 80);
+
+      const root = locateContentRoot();
+      if (root) {
+        const mo = new MutationObserver(() => debouncedBuild());
+        mo.observe(root, { childList: true, subtree: true, attributes: true });
+        window.__docsify_outline_mo = mo;
+      }
+
+      function attachImageLoadListeners() {
+        const r = locateContentRoot(); if (!r) return;
+        r.querySelectorAll('img').forEach(img => {
+          if (!img._outline_listener) {
+            img.addEventListener('load', debouncedBuild, { once: true });
+            img._outline_listener = true;
+          }
+        });
+      }
+      attachImageLoadListeners();
+      const imgObserver = new MutationObserver(() => attachImageLoadListeners());
+      if (root) imgObserver.observe(root, { childList: true, subtree: true });
+
+      window.addEventListener('load', () => { debouncedBuild(); setTimeout(debouncedBuild, 300); });
+      setTimeout(debouncedBuild, 120);
+    })();
   </script>
 </body>
 </html>
