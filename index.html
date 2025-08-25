@@ -2,16 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Docsify Site</title>
+  <meta name="description" content="A Docsify site with dynamic sidebar and dark mode">
 
   <!-- Vue Theme -->
   <link id="theme-link" rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
 
   <style>
-    /* Back to top button */
+    /* Dark mode using CSS variables */
+    body.dark {
+      --body-bg: #1e1e1e;
+      --body-color: #ddd;
+      background-color: var(--body-bg);
+      color: var(--body-color);
+    }
+
+    /* Sidebar link colors in dark mode */
+    body.dark .sidebar-nav a {
+      color: #ddd !important;
+    }
+
+    /* Floating back-to-top button */
     #back-to-top-btn {
       position: fixed;
       bottom: 50px;
@@ -25,33 +37,49 @@
       z-index: 9999;
     }
 
-    /* Dark mode using CSS variables */
-    body.dark {
-      --body-bg: #1e1e1e;
-      --body-color: #ddd;
+    /* Dark mode toggle button */
+    #dark-mode-btn {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      border: none;
+      background-color: #4a4a4a;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 9999;
     }
   </style>
 </head>
 <body>
   <div id="app"></div>
 
+  <!-- Buttons -->
   <button id="back-to-top-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆️</button>
+  <button id="dark-mode-btn" onclick="document.body.classList.toggle('dark')">🌓</button>
 
+  <!-- Docsify Configuration -->
   <script>
     window.$docsify = {
-      name: 'Docsify Example',
-      loadSidebar: true,
+      name: 'Dynamic Docsify Site',
+      auto2top: true,
       subMaxLevel: 3,
-      auto2top: true
+      search: {
+        placeholder: 'Type to search',
+        noData: 'No matches found',
+        depth: 2
+      },
+      loadSidebar: true, // required for auto sidebar
+      autoSidebar: true // dynamically generate sidebar from page headers
     };
   </script>
 
+  <!-- Docsify Core and Plugins -->
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
-
-  <!-- Simple Dark Mode Toggle -->
-  <script>
-    const toggleDarkMode = () => document.body.classList.toggle('dark');
-    // You can add a button in your markdown: <button onclick="toggleDarkMode()">🌓</button>
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
+  <!-- Docsify Auto Sidebar Plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify-auto-sidebar/dist/docsify-auto-sidebar.min.js"></script>
 </body>
 </html>
