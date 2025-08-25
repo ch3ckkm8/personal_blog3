@@ -1,258 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, shrink-to-fit=no, viewport-fit=cover" />
-  <title>Docsify Site</title>
-  <meta name="description" content="Docsify default template with right-side outline, dark mode toggle, and back-to-top" />
+<meta charset="utf-8" />
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no, viewport-fit=cover" />
+<title>Docsify Site</title>
+<meta name="description" content="Docsify template with right-side outline, dark mode toggle, back-to-top, and proper code highlighting" />
 
-  <!-- Docsify default theme -->
-  <link id="theme-link" rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
+<!-- Docsify default theme -->
+<link id="theme-link" rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
 
-  <!-- Prefer the saved theme before paint -->
-  <script>
-    (function () {
-      try {
-        var saved = localStorage.getItem('ds_theme'); // 'light' | 'dark'
-        if (saved === 'dark') {
-          var ln = document.getElementById('theme-link');
-          ln && ln.setAttribute('href', 'https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/dark.css');
-          document.documentElement.dataset.theme = 'dark';
-        } else {
-          document.documentElement.dataset.theme = 'light';
-        }
-      } catch (e) {}
-    })();
-  </script>
+<!-- Prism CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css">
 
-  <style>
-    /* --- Right-side Outline --- */
-    #page-outline {
-      position: fixed;
-      top: 72px;
-      right: 12px;
-      width: 300px;
-      max-height: calc(100vh - 96px);
-      overflow-y: auto;
-      background: rgba(255,255,255,0.9);
-      border: 1px solid rgba(0,0,0,0.08);
-      border-radius: 10px;
-      padding: 10px 12px;
-      box-shadow: 0 6px 22px rgba(0,0,0,.08);
-      z-index: 999;
-      font-size: 14px;
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-    }
-    #page-outline .outline-title{
-      font-size:12px; font-weight:700; text-transform:uppercase; opacity:.75; margin-bottom:8px;
-    }
-    #page-outline .outline-loading{ opacity:.7; font-size:13px; margin:8px 0; }
-    #page-outline a{
-      display:block; text-decoration:none; color:inherit;
-      padding:4px 0; border-left:2px solid transparent;
-    }
-    #page-outline a:hover{ border-left-color:#42b983; color:#42b983; }
-    #page-outline a.active{ border-left-color:#42b983; color:#42b983; font-weight:600; }
+<style>
+  /* --- Right-side Outline --- */
+  #page-outline {
+    position: fixed;
+    top: 72px;
+    right: 12px;
+    width: 300px;
+    max-height: calc(100vh - 96px);
+    overflow-y: auto;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 6px 22px rgba(0,0,0,.08);
+    z-index: 999;
+    font-size: 14px;
+    backdrop-filter: blur(6px);
+  }
+  #page-outline .outline-title{ font-size:12px; font-weight:700; text-transform:uppercase; opacity:.75; margin-bottom:8px; }
+  #page-outline .outline-loading{ opacity:.7; font-size:13px; margin:8px 0; }
+  #page-outline a{ display:block; text-decoration:none; color:inherit; padding:4px 0; border-left:2px solid transparent; }
+  #page-outline a:hover{ border-left-color:#42b983; color:#42b983; }
+  #page-outline a.active{ border-left-color:#42b983; color:#42b983; font-weight:600; }
+  #page-outline a[data-level="1"]{ margin-left:0 }
+  #page-outline a[data-level="2"]{ margin-left:8px }
+  #page-outline a[data-level="3"]{ margin-left:16px }
+  #page-outline a[data-level="4"]{ margin-left:24px }
+  #page-outline a[data-level="5"]{ margin-left:32px }
+  #page-outline a[data-level="6"]{ margin-left:40px }
+  @media (max-width: 1200px){ #page-outline{ display:none; } }
 
-    /* indent per level */
-    #page-outline a[data-level="1"]{ margin-left:0 }
-    #page-outline a[data-level="2"]{ margin-left:8px }
-    #page-outline a[data-level="3"]{ margin-left:16px }
-    #page-outline a[data-level="4"]{ margin-left:24px }
-    #page-outline a[data-level="5"]{ margin-left:32px }
-    #page-outline a[data-level="6"]{ margin-left:40px }
+  /* --- Floating Buttons --- */
+  #back-to-top-btn, #theme-toggle-btn {
+    position: fixed;
+    right: 16px;
+    z-index: 1200;
+    border: 1px solid rgba(0,0,0,0.12);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.95);
+    box-shadow: 0 4px 14px rgba(0,0,0,.08);
+  }
+  #back-to-top-btn{ bottom: 16px; }
+  #theme-toggle-btn{ bottom: 62px; }
+  #back-to-top-btn.hidden { display:none; }
 
-    /* Hide outline on smaller screens */
-    @media (max-width: 1200px){
-      #page-outline{ display:none; }
-    }
+  /* --- Code block styling --- */
+  pre code { border-radius:6px; padding:12px !important; display:block; line-height:1.5; }
+  pre { border-radius:6px; overflow-x:auto; margin:1em 0; }
 
-    /* --- Floating Buttons --- */
-    #back-to-top-btn, #theme-toggle-btn {
-      position: fixed;
-      right: 16px;
-      z-index: 1200;
-      border: 1px solid rgba(0,0,0,0.12);
-      padding: 8px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      background: rgba(255,255,255,0.95);
-      box-shadow: 0 4px 14px rgba(0,0,0,.08);
-    }
-    #back-to-top-btn{ bottom: 16px; }
-    #theme-toggle-btn{ bottom: 62px; }
-    #back-to-top-btn.hidden { display:none; }
-
-    /* --- Code block styling (GitHub-like) --- */
-    pre code {
-      border-radius: 6px;
-      padding: 12px !important;
-      display: block;
-      line-height: 1.5;
-    }
-    pre {
-      border-radius: 6px;
-      overflow-x: auto;
-      margin: 1em 0;
-    }
-
-    /* --- Dark mode UI polish --- */
-    html[data-theme="dark"] #page-outline{
-      background: rgba(20,20,20,0.6);
-      border-color: rgba(255,255,255,0.08);
-      color: #e6e6e6;
-    }
-    html[data-theme="dark"] #page-outline a:hover,
-    html[data-theme="dark"] #page-outline a.active{
-      color:#7bdcb5; border-left-color:#7bdcb5;
-    }
-    html[data-theme="dark"] #back-to-top-btn,
-    html[data-theme="dark"] #theme-toggle-btn{
-      background: rgba(32,32,32,0.85);
-      border-color: rgba(255,255,255,0.12);
-      color: #e6e6e6;
-    }
-
-    /* Dark mode header accent */
-    html[data-theme="dark"] h1,
-    html[data-theme="dark"] h2,
-    html[data-theme="dark"] h3,
-    html[data-theme="dark"] h4,
-    html[data-theme="dark"] h5,
-    html[data-theme="dark"] h6 {
-      color: #4da6ff;
-    }
-  </style>
+  /* Dark mode adjustments */
+  html[data-theme="dark"] #page-outline{
+    background: rgba(20,20,20,0.6);
+    border-color: rgba(255,255,255,0.08);
+    color: #e6e6e6;
+  }
+  html[data-theme="dark"] #page-outline a:hover,
+  html[data-theme="dark"] #page-outline a.active{ color:#7bdcb5; border-left-color:#7bdcb5; }
+  html[data-theme="dark"] #back-to-top-btn,
+  html[data-theme="dark"] #theme-toggle-btn{
+    background: rgba(32,32,32,0.85);
+    border-color: rgba(255,255,255,0.12);
+    color: #e6e6e6;
+  }
+  html[data-theme="dark"] h1,h2,h3,h4,h5,h6{ color:#4da6ff; }
+</style>
 </head>
 <body>
-  <!-- Docsify app root -->
-  <div id="app"></div>
+<div id="app"></div>
 
-  <!-- Right-side Outline -->
-  <nav id="page-outline" aria-label="On this page" role="navigation">
-    <div class="outline-title">On this page</div>
-    <div class="outline-loading">Loading…</div>
-  </nav>
+<!-- Right-side Outline -->
+<nav id="page-outline" aria-label="On this page" role="navigation">
+  <div class="outline-title">On this page</div>
+  <div class="outline-loading">Loading…</div>
+</nav>
 
-  <!-- Floating buttons -->
-  <button id="back-to-top-btn" class="hidden" title="Back to top">⬆️</button>
-  <button id="theme-toggle-btn" title="Toggle dark/light">🌓</button>
+<!-- Floating buttons -->
+<button id="back-to-top-btn" class="hidden" title="Back to top">⬆️</button>
+<button id="theme-toggle-btn" title="Toggle dark/light">🌓</button>
 
-  <!-- Docsify config -->
-  <script>
-    window.$docsify = {
-      name: 'Docsify Template',
-      repo: '',
-      loadSidebar: true,
-      subMaxLevel: 6,
-      auto2top: true,
-      search: 'auto',
-      plugins: [
-        function (hook, vm) {
-          hook.doneEach(function () {
-            // Always rebuild outline after docsify renders
-            setTimeout(() => buildOutline(0), 100);
-          });
-        }
-      ]
-    };
-  </script>
+<!-- Docsify config -->
+<script>
+  window.$docsify = {
+    name: 'Docsify Template',
+    repo: '',
+    loadSidebar: true,
+    subMaxLevel: 6,
+    auto2top: true,
+    search: 'auto'
+  };
+</script>
 
-  <!-- Docsify core + plugins -->
-  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
+<!-- Docsify core + plugins -->
+<script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
 
-  <script>
-    /* ---------------- Back to top ---------------- */
-    (function(){
-      const btn = document.getElementById('back-to-top-btn');
-      window.addEventListener('scroll', () => {
-        if (document.documentElement.scrollTop > 200 || window.scrollY > 200) {
-          btn.classList.remove('hidden');
-        } else {
-          btn.classList.add('hidden');
-        }
-      });
-      btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-    })();
+<!-- Prism JS -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-bash.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-shell-session.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-javascript.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-json.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-yaml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-markdown.min.js"></script>
 
-    /* ---------------- Theme toggle ---------------- */
-    (function(){
-      const btn = document.getElementById('theme-toggle-btn');
-      const linkEl = document.getElementById('theme-link');
-      function currentTheme(){ return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'; }
-      function setTheme(t){
-        if (t === 'dark') {
-          linkEl.setAttribute('href', 'https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/dark.css');
-        } else {
-          linkEl.setAttribute('href', 'https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css');
-        }
-        document.documentElement.dataset.theme = t;
-        try { localStorage.setItem('ds_theme', t); } catch(e){}
-        btn.textContent = t === 'dark' ? '☀️' : '🌓';
-      }
-      setTheme(currentTheme());
-      btn.addEventListener('click', () => setTheme(currentTheme() === 'dark' ? 'light' : 'dark'));
-    })();
+<script>
+  /* Back to top */
+  (function(){
+    const btn = document.getElementById('back-to-top-btn');
+    window.addEventListener('scroll', () => {
+      if (document.documentElement.scrollTop > 200 || window.scrollY > 200) {
+        btn.classList.remove('hidden');
+      } else btn.classList.add('hidden');
+    });
+    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  })();
 
-    /* ---------------- Right-side Outline ---------------- */
-    function buildOutline(attempt = 0){
-      const container = document.getElementById('page-outline');
-      if (!container) return;
-
-      const root = document.querySelector('.markdown-section');
-      if (!root) {
-        if (attempt < 40) return setTimeout(() => buildOutline(attempt+1), 80);
-        return;
-      }
-
-      const headers = Array.from(root.querySelectorAll('h1,h2,h3,h4,h5,h6'));
-      if (!headers.length) {
-        container.querySelectorAll('a').forEach(a => a.remove());
-        const l = container.querySelector('.outline-loading');
-        if (l) l.textContent = 'No headings found.';
-        return;
-      }
-
-      // Clear links
-      container.querySelectorAll('a[data-target]').forEach(a => a.remove());
-      const l = container.querySelector('.outline-loading'); if (l) l.remove();
-
-      const used = new Set();
-      headers.forEach(h => {
-        if (!h.id) {
-          let base = h.textContent.trim().toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
-          let uid = base, i = 1;
-          while (used.has(uid) || document.getElementById(uid)) uid = base + '-' + (i++);
-          h.id = uid;
-          used.add(uid);
-        } else {
-          used.add(h.id);
-        }
-
-        const level = parseInt(h.tagName.slice(1), 10) || 1;
-        const a = document.createElement('a');
-        a.href = 'javascript:void(0)';
-        a.setAttribute('data-target', h.id);
-        a.setAttribute('data-level', String(level));
-        a.textContent = h.textContent.trim();
-        container.appendChild(a);
-      });
-
-      container.onclick = function(e){
-        const a = e.target.closest && e.target.closest('a[data-target]');
-        if (!a) return;
-        e.preventDefault();
-        const h = document.getElementById(a.getAttribute('data-target'));
-        if (h) h.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        container.querySelectorAll('a').forEach(x => x.classList.remove('active'));
-        a.classList.add('active');
-      };
+  /* Theme toggle */
+  (function(){
+    const btn = document.getElementById('theme-toggle-btn');
+    const linkEl = document.getElementById('theme-link');
+    function currentTheme(){ return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'; }
+    function setTheme(t){
+      if(t==='dark'){ linkEl.setAttribute('href','https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/dark.css'); }
+      else{ linkEl.setAttribute('href','https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css'); }
+      document.documentElement.dataset.theme = t;
+      try{ localStorage.setItem('ds_theme', t); }catch(e){}
+      btn.textContent = t==='dark'?'☀️':'🌓';
     }
-  </script>
+    setTheme(currentTheme());
+    btn.addEventListener('click', ()=>setTheme(currentTheme()==='dark'?'light':'dark'));
+  })();
+
+  /* Outline + Prism highlighting */
+  function buildOutline() {
+    const container = document.getElementById('page-outline');
+    if(!container) return;
+    const root = document.querySelector('.markdown-section');
+    if(!root) return;
+
+    // Highlight all code blocks
+    Prism.highlightAll();
+
+    const headers = Array.from(root.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+    if(!headers.length){
+      container.querySelectorAll('a').forEach(a=>a.remove());
+      const l = container.querySelector('.outline-loading'); if(l) l.textContent='No headings found.';
+      return;
+    }
+    container.querySelectorAll('a[data-target]').forEach(a=>a.remove());
+    const l = container.querySelector('.outline-loading'); if(l) l.remove();
+
+    const used = new Set();
+    headers.forEach(h=>{
+      if(!h.id){
+        let base = h.textContent.trim().toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-');
+        let uid=base,i=1;
+        while(used.has(uid) || document.getElementById(uid)) uid=base+'-'+(i++);
+        h.id=uid; used.add(uid);
+      } else used.add(h.id);
+
+      const level = parseInt(h.tagName.slice(1),10)||1;
+      const a=document.createElement('a');
+      a.href='javascript:void(0)';
+      a.setAttribute('data-target',h.id);
+      a.setAttribute('data-level',String(level));
+      a.textContent=h.textContent.trim();
+      container.appendChild(a);
+    });
+
+    container.onclick = function(e){
+      const a=e.target.closest && e.target.closest('a[data-target]');
+      if(!a) return;
+      e.preventDefault();
+      const h=document.getElementById(a.getAttribute('data-target'));
+      if(h) h.scrollIntoView({behavior:'smooth',block:'start'});
+      container.querySelectorAll('a').forEach(x=>x.classList.remove('active'));
+      a.classList.add('active');
+    };
+  }
+
+  // Hook into Docsify lifecycle
+  window.$docsify.plugins = [].concat(window.$docsify.plugins||[], function(hook, vm){
+    hook.doneEach(function(){
+      setTimeout(buildOutline, 50);
+    });
+  });
+</script>
 </body>
 </html>
