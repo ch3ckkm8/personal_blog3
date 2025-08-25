@@ -72,10 +72,19 @@
 
   <!-- Dark Mode Toggle -->
   <script>
+    const themeLink = document.getElementById('theme-link');
+    let darkMode = false;
+  
     function toggleDarkMode() {
-      document.body.classList.toggle('dark');
+      if (!darkMode) {
+        themeLink.href = '//cdn.jsdelivr.net/npm/docsify-darklight-theme/dist/dark.css';
+      } else {
+        themeLink.href = '//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css';
+      }
+      darkMode = !darkMode;
     }
   </script>
+
   <button id="dark-mode-btn" onclick="toggleDarkMode()">🌓</button>
 
   <!-- Back to Top Button -->
