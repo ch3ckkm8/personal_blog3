@@ -13,7 +13,30 @@
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" id="theme-link">
 
   <!-- Dark Mode Toggle Styles -->
+  <!-- Styles for right-side TOC and buttons -->
   <style>
+    /* Right-side TOC container */
+    #toc {
+      position: fixed;
+      top: 80px;
+      right: 10px;
+      max-width: 250px;
+      max-height: 80%;
+      overflow-y: auto;
+      background: rgba(250, 250, 250, 0.95);
+      padding: 10px;
+      border-radius: 6px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      z-index: 999;
+      font-size: 14px;
+    }
+  
+    body.dark #toc {
+      background: rgba(35, 35, 35, 0.95);
+      color: #ddd;
+    }
+  
+    /* Floating buttons */
     #dark-mode-btn, #back-to-top-btn {
       position: fixed;
       right: 10px;
@@ -26,19 +49,24 @@
       cursor: pointer;
       font-size: 18px;
     }
-
-    #dark-mode-btn {
-      bottom: 10px;
-    }
-
-    #back-to-top-btn {
-      bottom: 50px;
-    }
+  
+    #dark-mode-btn { bottom: 10px; }
+    #back-to-top-btn { bottom: 50px; }
   </style>
 </head>
 
 <body>
   <div id="app"></div>
+
+  <div id="app"></div>
+
+  <!-- Right-side Table of Contents -->
+  <div id="toc"></div>
+  
+  <!-- Floating Buttons -->
+  <button id="dark-mode-btn" onclick="toggleDarkMode()">🌓</button>
+  <button id="back-to-top-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆️</button>
+
 
   <script>
     // Docsify Configuration
@@ -63,6 +91,26 @@
     };
   </script>
 
+  <script>
+    window.$docsify = {
+      name: 'Simple Docsify Template',
+  
+      // Sidebar configuration
+      auto2top: true,
+      loadSidebar: true,
+      maxLevel: 0,
+      subMaxLevel: 3, // header depth
+  
+      // Search
+      search: {
+        placeholder: 'Type to search',
+        noData: 'No matches found.',
+        depth: 2
+      }
+    };
+  </script>
+
+
   <!-- Docsify Core -->
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
 
@@ -82,8 +130,37 @@
         themeLink.href = '//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css';
       }
       darkMode = !darkMode;
+      document.getElementById('toc').classList.toggle('dark', darkMode);
     }
   </script>
+
+  <script>
+    function generateTOC() {
+      const tocContainer = document.getElementById('toc');
+      tocContainer.innerHTML = '';
+  
+      const headers = document.querySelectorAll('#app h1, #app h2, #app h3');
+      headers.forEach(header => {
+        // Create ID if missing
+        if (!header.id) header.id = header.textContent.trim().replace(/\s+/g, '-');
+  
+        const link = document.createElement('a');
+        link.href = `#${header.id}`;
+        link.textContent = header.textContent;
+        link.style.display = 'block';
+        link.style.marginLeft = (parseInt(header.tagName[1]) - 1) * 10 + 'px';
+        tocContainer.appendChild(link);
+      });
+    }
+  
+    // Run after each Docsify page render
+    window.$docsify.plugins = [].concat(window.$docsify.plugins, function (hook, vm) {
+      hook.doneEach(function () {
+        generateTOC();
+      });
+    });
+  </script>
+
 
   <button id="dark-mode-btn" onclick="toggleDarkMode()">🌓</button>
 
