@@ -7,7 +7,7 @@
   <title>Docsify Site</title>
   <meta name="description" content="Docsify with robust dynamic outline (h1-h6), dark mode, and sidebar" />
 
-  <!-- Docsify Vue theme (includes Prism highlighting by default) -->
+  <!-- Docsify Vue theme (bundles Prism highlighting by default) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
 
   <style>
@@ -55,28 +55,30 @@
     }
     a { color: var(--link); }
 
+    /* IMPORTANT: do NOT force descendant colors inside markdown-section.
+       That would override Prism token colors. */
     body .content,
     body .markdown-section,
-    body .content > .markdown-section,
-    body .content .markdown-section * {
+    body .content > .markdown-section {
       background: transparent !important;
-      color: inherit !important;
+      /* removed: color: inherit !important; */
     }
 
     /* ---------- Code blocks & inline code ---------- */
     .markdown-section {
       background-color: var(--bg) !important;
-      color: var(--text) !important;
+      color: var(--text) !important; /* sets base text color; Prism tokens still override within <pre><code> */
     }
-    .markdown-section pre, .markdown-section pre > code {
+    .markdown-section pre,
+    .markdown-section pre > code {
       background: var(--code-bg) !important;
       border: 1px solid var(--border) !important;
-      /* ❌ don’t override text color — Prism provides colors */
+      /* DO NOT set color here; let Prism style the tokens */
     }
     .markdown-section code:not(pre code) {
       background: var(--code-bg) !important;
       border: 1px solid var(--border) !important;
-      color: var(--text) !important; /* inline code keeps theme text */
+      color: var(--text) !important; /* inline code uses theme text */
       padding: 2px 4px;
       border-radius: 4px;
     }
@@ -221,7 +223,7 @@
     })();
   </script>
 
-  <!-- Outline builder (full restored version) -->
+  <!-- Outline builder (full) -->
   <script>
     let outlineObserver = null;
 
