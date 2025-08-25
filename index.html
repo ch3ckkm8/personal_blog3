@@ -1,443 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, shrink-to-fit=no, viewport-fit=cover" />
-  <title>Docsify Site</title>
-  <meta name="description" content="Docsify with robust dynamic outline (h1-h6), dark mode, and sidebar" />
+    content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no, viewport-fit=cover">
 
-  <!-- Docsify Vue theme -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
+  <title>Awesome Docsify Site</title>
+  <meta name="description" content="An awesome docsify site for publishing some content on the web.">
+
+  <!-- Default Docsify Theme -->
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
 
   <style>
-    /* ---------- Color System (light / dark via CSS vars) ---------- */
-    :root {
-      --bg: #ffffff;
-      --text: #2c3e50;
-      --muted: #6b778d;
-      --link: #42b983;
-      --border: #eaecef;
-      --code-bg: #f6f8fa;
-
-      --sidebar-bg: #ffffff;
-      --sidebar-fg: #2c3e50;
-      --sidebar-border: #eaecef;
-
-      --outline-bg: rgba(250, 250, 250, 0.6);
-      --outline-fg: #2c3e50;
-      --outline-border: #eaecef;
-      --outline-active: #42b983;
-    }
-
-    body.dark {
-      --bg: #121212;
-      --text: #e6e6e6;
-      --muted: #a0a0a0;
-      --link: #7bdcb5;
-      --border: #2a2a2a;
-      --code-bg: #1e1e1e;
-
-      --sidebar-bg: #161616;
-      --sidebar-fg: #e6e6e6;
-      --sidebar-border: #2a2a2a;
-
-      --outline-bg: rgba(28, 28, 28, 0.6);
-      --outline-fg: #e6e6e6;
-      --outline-border: #2a2a2a;
-      --outline-active: #7bdcb5;
-    }
-
-    /* ---------- Base ---------- */
     body {
-      background: var(--bg);
-      color: var(--text);
-    }
-    a { color: var(--link); }
-
-    .content, .markdown-section {
-      background: var(--bg);
-      color: var(--text);
-    }
-    .markdown-section p, .markdown-section li { color: var(--text); }
-    .markdown-section blockquote {
-      border-left-color: var(--border);
-      color: var(--muted);
-      background: transparent;
-    }
-    .markdown-section pre, .markdown-section pre > code {
-      background: var(--code-bg) !important;
-      border: 1px solid var(--border);
-    }
-    .markdown-section code:not(pre code) {
-      background: var(--code-bg);
-      border: 1px solid var(--border);
+      transition: background 0.3s, color 0.3s;
     }
 
-    /* ---------- Left Sidebar (dark-mode aware) ---------- */
+    /* Sidebar (left) fix for dark mode */
     .sidebar {
-      background: var(--sidebar-bg);
-      color: var(--sidebar-fg);
-      border-right: 1px solid var(--sidebar-border);
+      background: var(--sidebar-bg, #fff);
+      color: inherit;
     }
-    .sidebar .app-name, .app-name-link, .sidebar .app-name-link {
-      color: var(--sidebar-fg) !important;
-    }
-    .sidebar .sidebar-nav a {
-      color: var(--sidebar-fg) !important;
-    }
-    .sidebar .sidebar-nav li.active > a {
-      color: var(--outline-active) !important;
-      font-weight: 600;
-    }
-    .sidebar .search input {
-      background: var(--code-bg);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .sidebar .search .results-panel {
-      background: var(--sidebar-bg);
-      border: 1px solid var(--sidebar-border);
+    body.dark .sidebar {
+      --sidebar-bg: #1e1e1e;
+      color: #ddd;
     }
 
-    /* ---------- Right Outline ---------- */
+    /* Outline (right side TOC) */
     #outline {
       position: fixed;
-      top: 72px;
-      right: 12px;
-      width: 280px;
-      max-height: 80vh;
+      top: 60px;
+      right: 0;
+      width: 260px;
+      bottom: 20px;
       overflow-y: auto;
-      background: var(--outline-bg);
-      color: var(--outline-fg);
-      border: 1px solid var(--outline-border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      box-shadow: 0 4px 18px rgba(0,0,0,.08);
-      z-index: 999;
+      padding: 12px;
       font-size: 14px;
+      border-left: 1px solid rgba(0,0,0,0.1);
+      background: var(--outline-bg, rgba(250,250,250,0.9));
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      transition: background 0.3s;
     }
-    #outline .outline-title {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      opacity: .8;
-      margin-bottom: 8px;
+    body.dark #outline {
+      --outline-bg: rgba(28,28,28,0.8);
+      border-left: 1px solid rgba(255,255,255,0.1);
+    }
+    #outline h3 {
+      margin-top: 0;
+      font-size: 15px;
+      font-weight: bold;
+    }
+    #outline ul {
+      list-style: none;
+      padding-left: 10px;
+    }
+    #outline li {
+      margin: 3px 0;
     }
     #outline a {
-      display: block;
       text-decoration: none;
       color: inherit;
-      padding: 4px 0;
-      border-left: 2px solid transparent;
-      transition: border-color .15s ease, color .15s ease;
-      line-height: 1.25;
-    }
-    #outline a:hover {
-      color: var(--outline-active);
-    }
-    #outline a.active {
-      color: var(--outline-active);
-      border-left-color: var(--outline-active);
-      font-weight: 600;
     }
 
-    /* indent by heading level (1..6) */
-    #outline a[data-level="1"] { margin-left: 0; }
-    #outline a[data-level="2"] { margin-left: 8px; }
-    #outline a[data-level="3"] { margin-left: 16px; }
-    #outline a[data-level="4"] { margin-left: 24px; }
-    #outline a[data-level="5"] { margin-left: 32px; }
-    #outline a[data-level="6"] { margin-left: 40px; }
-
-    /* Hide outline on small screens to avoid overlap */
-    @media (max-width: 1200px) {
-      #outline { display: none; }
-    }
-
-    /* ---------- Floating Buttons ---------- */
-    #back-to-top-btn, #dark-mode-btn {
+    /* Dark mode toggle button */
+    #dark-mode-toggle {
       position: fixed;
-      right: 12px;
+      bottom: 80px;
+      right: 20px;
       z-index: 1000;
-      border: none;
-      background: var(--code-bg);
-      color: var(--text);
       padding: 8px 12px;
       border-radius: 8px;
+      border: none;
+      background: #333;
+      color: #fff;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,.1);
-      border: 1px solid var(--border);
     }
-    #back-to-top-btn { bottom: 56px; }
-    #dark-mode-btn { bottom: 12px; }
+    body.dark #dark-mode-toggle {
+      background: #eee;
+      color: #000;
+    }
+
+    /* Back to top button */
+    #back-to-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      padding: 10px 14px;
+      border-radius: 50%;
+      border: none;
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div id="app"></div>
+  <div id="outline"><h3>On this page</h3><p>Loading…</p></div>
+  <button id="dark-mode-toggle">🌙</button>
+  <button id="back-to-top">↑</button>
 
-  <!-- Right-side Outline -->
-  <nav id="outline" aria-label="On this page" role="navigation">
-    <div class="outline-title">On this page</div>
-    <!-- links will be injected here -->
-  </nav>
-
-  <!-- Buttons -->
-  <button id="back-to-top-btn" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">⬆️</button>
-  <button id="dark-mode-btn" title="Toggle dark mode">🌓</button>
-
-  <!-- Init theme from preference -->
-  <script>
-    (function initThemeFromStorage() {
-      try {
-        const pref = localStorage.getItem('ds_dark');
-        if (pref === '1' || (!pref && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.body.classList.add('dark');
-        }
-      } catch (_) {}
-    })();
-  </script>
-
-  <!-- Docsify config -->
   <script>
     window.$docsify = {
-      name: 'Dynamic Docsify Site',
+      name: 'Simple Docsify Template',
       auto2top: true,
-      subMaxLevel: 6,    // allow up to h6 in sidebar generation too
       loadSidebar: true,
-      autoSidebar: true,
+      subMaxLevel: 3,
       search: {
         placeholder: 'Type to search',
-        noData: 'No matches found',
-        depth: 6
+        noData: 'No matches found.',
+        depth: 2,
       }
     };
   </script>
 
-  <!-- Docsify core + plugins -->
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docsify-auto-sidebar/dist/docsify-auto-sidebar.min.js"></script>
 
   <script>
-    // Dark mode toggle (store preference)
-    (function attachDarkMode() {
-      const btn = document.getElementById('dark-mode-btn');
-      btn.addEventListener('click', function () {
-        const isDark = document.body.classList.toggle('dark');
-        try { localStorage.setItem('ds_dark', isDark ? '1' : '0'); } catch (_) {}
-      });
-    })();
+    /* Dark mode toggle */
+    const btn = document.getElementById('dark-mode-toggle');
+    btn.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      btn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    });
 
-    // ---------- Robust outline builder (h1 - h6) ----------
-    let outlineObserver = null;
+    /* Back to top */
+    const topBtn = document.getElementById('back-to-top');
+    window.addEventListener('scroll', () => {
+      if (document.documentElement.scrollTop > 200) topBtn.style.display = 'block';
+      else topBtn.style.display = 'none';
+    });
+    topBtn.addEventListener('click', () => window.scrollTo({top: 0, behavior: 'smooth'}));
 
-    function slugify(text) {
-      return (text || '')
-        .trim()
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '-');
-    }
-
-    function isInsideSidebar(node) {
-      return !!node.closest('.sidebar');
-    }
-
+    /* --- Outline Builder --- */
     function gatherHeaders() {
-      // Prefer the rendered markdown container(s) where Docsify injects pages.
-      const candidateRoots = [
-        document.querySelector('.markdown-section'),
-        document.querySelector('.content'), 
-        document.querySelector('#main'),
-        document.querySelector('article'),
-        document.querySelector('.main'),
-        document.querySelector('#app')
-      ];
-
-      let headers = [];
-      for (const root of candidateRoots) {
-        if (!root) continue;
-        const hs = Array.from(root.querySelectorAll('h1,h2,h3,h4,h5,h6'));
-        // filter out headers that are part of the sidebar or outline itself
-        const filtered = hs.filter(h => !isInsideSidebar(h) && !h.closest('#outline'));
-        if (filtered.length) {
-          headers = filtered;
-          break;
-        }
-      }
-
-      // If still empty, try anywhere in #app then document-wide (last resort)
-      if (!headers.length) {
-        const app = document.getElementById('app');
-        if (app) {
-          headers = Array.from(app.querySelectorAll('h1,h2,h3,h4,h5,h6'))
-            .filter(h => !isInsideSidebar(h) && !h.closest('#outline'));
-        }
-      }
-      if (!headers.length) {
-        headers = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6'))
-          .filter(h => !isInsideSidebar(h) && !h.closest('#outline'));
-      }
-      return headers;
+      const content = document.querySelector('.markdown-section')
+        || document.querySelector('.content')
+        || document.getElementById('app');
+      if (!content) return [];
+      return Array.from(content.querySelectorAll('h1,h2,h3,h4,h5,h6'));
     }
 
-    function clearOutlineLinks(container) {
-      container.querySelectorAll('a').forEach(a => a.remove());
-    }
-
-    function buildOutlineOnce(attempt = 0) {
-      const container = document.getElementById('outline');
-      if (!container) return;
-
+    function buildOutlineOnce() {
+      const outline = document.getElementById('outline');
       const headers = gatherHeaders();
-
       if (!headers.length) {
-        // wait briefly and retry a few times (Docsify injects content async)
-        if (attempt < 40) { // ~2 seconds total (40 * 50ms)
-          return setTimeout(() => buildOutlineOnce(attempt + 1), 50);
-        } else {
-          // give up and clear previous links (keep title)
-          clearOutlineLinks(container);
-          return;
-        }
+        outline.innerHTML = '<h3>On this page</h3><p>No headings found.</p>';
+        return;
       }
-
-      // got headers -> build links
-      clearOutlineLinks(container);
-
-      const usedIds = new Set();
-      const links = [];
-
+      let html = '<h3>On this page</h3><ul>';
       headers.forEach(h => {
-        // ensure visible header text
-        const text = (h.textContent || h.innerText || '').trim();
-        if (!text) return;
-
-        // ensure id
-        if (!h.id) {
-          let id = slugify(text);
-          // avoid duplicates
-          let uid = id;
-          let counter = 1;
-          while (usedIds.has(uid) || document.getElementById(uid)) {
-            uid = `${id}-${counter++}`;
-          }
-          h.id = uid;
-          usedIds.add(uid);
-        } else {
-          usedIds.add(h.id);
-        }
-
-        const level = Math.min(6, Math.max(1, parseInt(h.tagName.substring(1), 10) || 1));
-        const a = document.createElement('a');
-        a.setAttribute('href', 'javascript:void(0)');
-        a.setAttribute('data-target', h.id);
-        a.setAttribute('data-level', String(level));
-        a.textContent = text;
-        a.dataset.headtext = text;
-        a.style.display = 'block';
-        a.style.marginLeft = (level - 1) * 8 + 'px'; // visual indent
-        container.appendChild(a);
-        links.push({link: a, header: h});
+        const id = h.id || h.textContent.trim().toLowerCase().replace(/\s+/g, '-');
+        h.id = id;
+        html += `<li style="margin-left:${(parseInt(h.tagName[1])-1)*12}px">
+                   <a href="#${id}">${h.textContent}</a>
+                 </li>`;
       });
-
-      // Click behavior (delegate)
-      container.onclick = (e) => {
-        const a = e.target.closest('a[data-target]');
-        if (!a) return;
-        const target = document.getElementById(a.getAttribute('data-target'));
-        if (target) {
-          // Use smooth scrolling; ensure offset for top bar if present
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          // update URL hash without jumping (history API)
-          try {
-            history.replaceState(null, '', '#' + a.getAttribute('data-target'));
-          } catch (_) {}
-        }
-      };
-
-      // IntersectionObserver to highlight current header
-      if (outlineObserver) outlineObserver.disconnect();
-
-      const linkMap = {};
-      const observedHeaders = [];
-
-      links.forEach(item => {
-        linkMap[item.header.id] = item.link;
-        observedHeaders.push(item.header);
-      });
-
-      // If no observedHeaders, just return
-      if (!observedHeaders.length) return;
-
-      const observerOptions = {
-        root: null,
-        rootMargin: '0px 0px -65% 0px', // consider a header active when it's near top
-        threshold: 0.05
-      };
-
-      outlineObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          const id = entry.target.id;
-          const link = linkMap[id];
-          if (!link) return;
-          if (entry.isIntersecting) {
-            // clear active
-            container.querySelectorAll('a').forEach(a => a.classList.remove('active'));
-            link.classList.add('active');
-          }
-        });
-      }, observerOptions);
-
-      observedHeaders.forEach(h => outlineObserver.observe(h));
-
-      // initial highlight: try to mark first visible header or use current hash
-      setTimeout(() => {
-        // if there's a hash, highlight that
-        const hash = (location.hash || '').replace(/^#/, '');
-        if (hash && linkMap[hash]) {
-          container.querySelectorAll('a').forEach(a => a.classList.remove('active'));
-          linkMap[hash].classList.add('active');
-          return;
-        }
-        // otherwise, find first header that's near top
-        for (const h of observedHeaders) {
-          const rect = h.getBoundingClientRect();
-          if (rect.top >= 0 && rect.top < window.innerHeight * 0.7) {
-            const l = linkMap[h.id];
-            if (l) {
-              container.querySelectorAll('a').forEach(a => a.classList.remove('active'));
-              l.classList.add('active');
-              break;
-            }
-          }
-        }
-      }, 120);
+      html += '</ul>';
+      outline.innerHTML = html;
     }
 
-    // Rebuild outline after each Docsify render (SPA navigation)
-    (function injectOutlinePlugin() {
-      const orig = window.$docsify.plugins || [];
-      window.$docsify.plugins = [].concat(orig, function (hook, vm) {
-        hook.doneEach(function () {
-          // allow other plugins (autoSidebar, anchor plugin) to finish; small delay
-          setTimeout(() => buildOutlineOnce(0), 60);
+    /* --- Robust Auto Rebuild --- */
+    (function enableOutlineAutoRebuild() {
+      if (typeof buildOutlineOnce !== 'function') return;
+
+      function debounce(fn, wait = 80) {
+        let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a),wait); };
+      }
+      const debouncedBuild = debounce(buildOutlineOnce, 100);
+
+      function locateContentRoot() {
+        return document.querySelector('.markdown-section')
+          || document.querySelector('.content')
+          || document.getElementById('app');
+      }
+      const root = locateContentRoot();
+      if (root) {
+        const mo = new MutationObserver(() => debouncedBuild());
+        mo.observe(root, { childList: true, subtree: true, attributes: true });
+        window.__docsify_outline_mo = mo;
+      }
+
+      function attachImageLoadListeners() {
+        const r = locateContentRoot(); if (!r) return;
+        r.querySelectorAll('img').forEach(img => {
+          if (!img._outline_listener) {
+            img.addEventListener('load', debouncedBuild, { once: true });
+            img._outline_listener = true;
+          }
         });
-      });
+      }
+      attachImageLoadListeners();
+      const imgObserver = new MutationObserver(() => attachImageLoadListeners());
+      if (root) imgObserver.observe(root, { childList: true, subtree: true });
+
+      window.addEventListener('load', () => { debouncedBuild(); setTimeout(debouncedBuild,300); });
+      setTimeout(debouncedBuild, 120);
     })();
-
-    // Also rebuild on hash change (user clicked a native anchor)
-    window.addEventListener('hashchange', () => {
-      setTimeout(() => buildOutlineOnce(0), 80);
-    });
-
-    // Rebuild on resize (in case layout changes)
-    window.addEventListener('resize', () => {
-      setTimeout(() => buildOutlineOnce(0), 120);
-    });
   </script>
 </body>
 </html>
