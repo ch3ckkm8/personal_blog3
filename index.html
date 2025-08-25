@@ -12,6 +12,13 @@
   <!-- Default Theme -->
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" id="theme-link">
 
+  <!-- Prism.js for syntax highlighting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css" />
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-javascript.min.js"></script>
+
   <!-- Styles -->
   <style>
     /* Right-side TOC container */
@@ -56,39 +63,6 @@
 
     #back-to-top-btn {
       bottom: 50px;
-    }
-
-    /* Fix code and blockquote visibility */
-    pre,
-    code {
-      background: #f5f5f5;
-      color: #333;
-      border-radius: 4px;
-    }
-
-    body.dark pre,
-    body.dark code {
-      background: #1e1e1e;
-      color: #e6e6e6;
-    }
-
-    pre {
-      padding: 10px;
-      overflow-x: auto;
-    }
-
-    blockquote {
-      border-left: 4px solid #42b983;
-      padding: 6px 12px;
-      margin: 10px 0;
-      background: #f9f9f9;
-      color: #555;
-    }
-
-    body.dark blockquote {
-      border-left: 4px solid #42b983;
-      background: #2a2a2a;
-      color: #ccc;
     }
   </style>
 </head>
