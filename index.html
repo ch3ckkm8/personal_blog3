@@ -1,85 +1,316 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, shrink-to-fit=no, viewport-fit=cover" />
   <title>Docsify Site</title>
-  <meta name="description" content="A Docsify site with dynamic sidebar and dark mode">
+  <meta name="description" content="Docsify with dynamic sidebar, right outline, and dark mode" />
 
-  <!-- Vue Theme -->
-  <link id="theme-link" rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <!-- Docsify Vue theme -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
 
   <style>
-    /* Dark mode using CSS variables */
+    /* ---------- Color System (light / dark via CSS vars) ---------- */
+    :root {
+      --bg: #ffffff;
+      --text: #2c3e50;
+      --muted: #6b778d;
+      --link: #42b983;
+      --border: #eaecef;
+      --code-bg: #f6f8fa;
+
+      --sidebar-bg: #ffffff;
+      --sidebar-fg: #2c3e50;
+      --sidebar-border: #eaecef;
+
+      --outline-bg: rgba(250, 250, 250, 0.95);
+      --outline-fg: #2c3e50;
+      --outline-border: #eaecef;
+      --outline-active: #42b983;
+    }
+
     body.dark {
-      --body-bg: #1e1e1e;
-      --body-color: #ddd;
-      background-color: var(--body-bg);
-      color: var(--body-color);
+      --bg: #121212;
+      --text: #e6e6e6;
+      --muted: #a0a0a0;
+      --link: #7bdcb5;
+      --border: #2a2a2a;
+      --code-bg: #1e1e1e;
+
+      --sidebar-bg: #161616;
+      --sidebar-fg: #e6e6e6;
+      --sidebar-border: #2a2a2a;
+
+      --outline-bg: rgba(28, 28, 28, 0.95);
+      --outline-fg: #e6e6e6;
+      --outline-border: #2a2a2a;
+      --outline-active: #7bdcb5;
     }
 
-    /* Sidebar link colors in dark mode */
-    body.dark .sidebar-nav a {
-      color: #ddd !important;
+    /* ---------- Base ---------- */
+    body {
+      background: var(--bg);
+      color: var(--text);
+    }
+    a { color: var(--link); }
+
+    /* Docsify content area */
+    .content, .markdown-section {
+      background: var(--bg);
+      color: var(--text);
+    }
+    .markdown-section p, .markdown-section li { color: var(--text); }
+    .markdown-section blockquote {
+      border-left-color: var(--border);
+      color: var(--muted);
+      background: transparent;
+    }
+    .markdown-section pre, .markdown-section pre > code {
+      background: var(--code-bg) !important;
+      border: 1px solid var(--border);
+    }
+    .markdown-section code:not(pre code) {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
     }
 
-    /* Floating back-to-top button */
-    #back-to-top-btn {
+    /* ---------- Left Sidebar (make it change on dark mode) ---------- */
+    .sidebar {
+      background: var(--sidebar-bg);
+      color: var(--sidebar-fg);
+      border-right: 1px solid var(--sidebar-border);
+    }
+    .sidebar .app-name, .app-name-link, .sidebar .app-name-link {
+      color: var(--sidebar-fg) !important;
+    }
+    .sidebar .sidebar-nav a {
+      color: var(--sidebar-fg) !important;
+    }
+    .sidebar .sidebar-nav li.active > a {
+      color: var(--outline-active) !important;
+      font-weight: 600;
+    }
+    .sidebar .search input {
+      background: var(--code-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .sidebar .search .results-panel {
+      background: var(--sidebar-bg);
+      border: 1px solid var(--sidebar-border);
+    }
+
+    /* ---------- Right Outline ---------- */
+    #outline {
       position: fixed;
-      bottom: 50px;
-      right: 10px;
-      border: none;
-      background-color: #4a4a4a;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 9999;
+      top: 72px;
+      right: 12px;
+      width: 260px;
+      max-height: 80vh;
+      overflow-y: auto;
+      background: var(--outline-bg);
+      color: var(--outline-fg);
+      border: 1px solid var(--outline-border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      box-shadow: 0 4px 18px rgba(0,0,0,.08);
+      z-index: 999;
+    }
+    #outline .outline-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      opacity: .8;
+      margin-bottom: 8px;
+    }
+    #outline a {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      padding: 4px 0;
+      border-left: 2px solid transparent;
+      transition: border-color .15s ease, color .15s ease;
+      line-height: 1.25;
+    }
+    #outline a:hover {
+      color: var(--outline-active);
+    }
+    #outline a.active {
+      color: var(--outline-active);
+      border-left-color: var(--outline-active);
+      font-weight: 600;
     }
 
-    /* Dark mode toggle button */
-    #dark-mode-btn {
-      position: fixed;
-      bottom: 10px;
-      right: 10px;
-      border: none;
-      background-color: #4a4a4a;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 9999;
+    /* indent by heading level */
+    #outline a[data-level="1"] { margin-left: 0; }
+    #outline a[data-level="2"] { margin-left: 12px; }
+    #outline a[data-level="3"] { margin-left: 24px; }
+    #outline a[data-level="4"] { margin-left: 36px; }
+
+    /* Hide outline on small screens to avoid overlap */
+    @media (max-width: 1200px) {
+      #outline { display: none; }
     }
+
+    /* ---------- Floating Buttons ---------- */
+    #back-to-top-btn, #dark-mode-btn {
+      position: fixed;
+      right: 12px;
+      z-index: 1000;
+      border: none;
+      background: var(--code-bg);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      border: 1px solid var(--border);
+    }
+    #back-to-top-btn { bottom: 56px; }
+    #dark-mode-btn { bottom: 12px; }
   </style>
 </head>
 <body>
   <div id="app"></div>
 
-  <!-- Buttons -->
-  <button id="back-to-top-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆️</button>
-  <button id="dark-mode-btn" onclick="document.body.classList.toggle('dark')">🌓</button>
+  <!-- Right-side Outline -->
+  <nav id="outline" aria-label="On this page" role="navigation">
+    <div class="outline-title">On this page</div>
+    <!-- links injected by JS -->
+  </nav>
 
-  <!-- Docsify Configuration -->
+  <!-- Buttons -->
+  <button id="back-to-top-btn" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">⬆️</button>
+  <button id="dark-mode-btn" title="Toggle dark mode">🌓</button>
+
+  <!-- Docsify config -->
   <script>
+    // Persisted dark mode preference
+    (function initThemeFromStorage() {
+      try {
+        const pref = localStorage.getItem('ds_dark');
+        if (pref === '1' || (!pref && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.body.classList.add('dark');
+        }
+      } catch (_) {}
+    })();
+
     window.$docsify = {
       name: 'Dynamic Docsify Site',
       auto2top: true,
       subMaxLevel: 3,
+      loadSidebar: true,           // required for auto sidebar
+      autoSidebar: true,           // generate sidebar from page headers
       search: {
         placeholder: 'Type to search',
         noData: 'No matches found',
         depth: 2
-      },
-      loadSidebar: true, // required for auto sidebar
-      autoSidebar: true // dynamically generate sidebar from page headers
+      }
     };
   </script>
 
-  <!-- Docsify Core and Plugins -->
+  <!-- Docsify core + plugins -->
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
-  <!-- Docsify Auto Sidebar Plugin -->
+  <!-- Auto Sidebar (dynamic left TOC) -->
   <script src="https://cdn.jsdelivr.net/npm/docsify-auto-sidebar/dist/docsify-auto-sidebar.min.js"></script>
+
+  <script>
+    // Dark mode toggle (no CSS swapping)
+    (function attachDarkMode() {
+      const btn = document.getElementById('dark-mode-btn');
+      btn.addEventListener('click', function () {
+        document.body.classList.toggle('dark');
+        try { localStorage.setItem('ds_dark', document.body.classList.contains('dark') ? '1' : '0'); } catch (_) {}
+      });
+    })();
+
+    // ----- Right Outline builder -----
+    let outlineObserver;
+
+    function slugify(text) {
+      return text
+        .trim()
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-');
+    }
+
+    function buildOutline() {
+      const container = document.getElementById('outline');
+      if (!container) return;
+
+      // Keep the title, clear previous links
+      container.querySelectorAll('a').forEach(a => a.remove());
+
+      // Docsify renders into .content
+      const content = document.querySelector('.content');
+      if (!content) return;
+
+      const headers = content.querySelectorAll('h1, h2, h3, h4');
+      if (!headers.length) {
+        return; // leave only the title (no sections)
+      }
+
+      headers.forEach(h => {
+        if (!h.id) h.id = slugify(h.textContent || h.innerText || '');
+        const level = parseInt(h.tagName[1], 10);
+        const a = document.createElement('a');
+        a.setAttribute('href', 'javascript:void(0)');
+        a.setAttribute('data-target', h.id);
+        a.setAttribute('data-level', level);
+        a.textContent = h.textContent || h.innerText || '';
+        container.appendChild(a);
+      });
+
+      // Click -> smooth scroll to header (works in SPA routes)
+      container.onclick = (e) => {
+        const a = e.target.closest('a[data-target]');
+        if (!a) return;
+        const target = document.getElementById(a.getAttribute('data-target'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+
+      // Highlight section in view
+      if (outlineObserver) outlineObserver.disconnect();
+
+      const links = Array.from(container.querySelectorAll('a[data-target]'));
+      const linkMap = {};
+      links.forEach(a => { linkMap[a.getAttribute('data-target')] = a; });
+
+      const opts = { root: null, rootMargin: '0px 0px -70% 0px', threshold: 0.1 };
+      outlineObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          const id = entry.target.id;
+          const link = linkMap[id];
+          if (!link) return;
+          if (entry.isIntersecting) {
+            links.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+          }
+        });
+      }, opts);
+
+      headers.forEach(h => outlineObserver.observe(h));
+    }
+
+    // Rebuild outline after each Docsify render
+    window.$docsify = window.$docsify || {};
+    (function injectPlugin() {
+      const origPlugins = window.$docsify.plugins || [];
+      window.$docsify.plugins = [].concat(origPlugins, function (hook, vm) {
+        hook.doneEach(function () {
+          // Ensure headings have ids (Docsify usually adds anchors, but we guard anyway)
+          document.querySelectorAll('.content h1, .content h2, .content h3, .content h4').forEach(h => {
+            if (!h.id) h.id = slugify(h.textContent || h.innerText || '');
+          });
+          buildOutline();
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
