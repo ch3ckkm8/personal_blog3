@@ -3,78 +3,55 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport"
-        content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no, viewport-fit=cover">
+        content="width=device-width, initial-scale=1.0">
 
-  <title>Awesome Docsify Site</title>
-  <meta name="description" content="An awesome docsify site for publishing some content on the web.">
+  <title>Docsify Site</title>
 
-  <!-- Vue Light Theme -->
+  <!-- Vue Theme -->
   <link id="theme-link" rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
 
-  <!-- Styles for floating buttons -->
   <style>
-    #dark-mode-btn, #back-to-top-btn {
+    /* Back to top button */
+    #back-to-top-btn {
       position: fixed;
+      bottom: 50px;
       right: 10px;
-      z-index: 9999;
       border: none;
       background-color: #4a4a4a;
       color: white;
       padding: 8px 12px;
       border-radius: 5px;
       cursor: pointer;
-      font-size: 18px;
+      z-index: 9999;
     }
 
-    #dark-mode-btn { bottom: 10px; }
-    #back-to-top-btn { bottom: 50px; }
+    /* Dark mode using CSS variables */
+    body.dark {
+      --body-bg: #1e1e1e;
+      --body-color: #ddd;
+    }
   </style>
 </head>
-
 <body>
   <div id="app"></div>
 
-  <!-- Floating Buttons -->
-  <button id="dark-mode-btn" onclick="toggleDarkMode()">🌓</button>
   <button id="back-to-top-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆️</button>
 
-  <!-- Docsify Configuration -->
   <script>
     window.$docsify = {
-      name: 'Simple Docsify Template',
-      auto2top: true,
+      name: 'Docsify Example',
       loadSidebar: true,
       subMaxLevel: 3,
-      search: {
-        placeholder: 'Type to search',
-        noData: 'No matches found.',
-        depth: 2
-      },
-      toc: {
-        depth: 3,
-        collapse: true
-      }
+      auto2top: true
     };
   </script>
 
-  <!-- Docsify Core and Plugins -->
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
 
-  <!-- Docsify TOC Plugin -->
-  <script src="//cdn.jsdelivr.net/npm/docsify-toc/dist/docsify-toc.min.js"></script>
-
-  <!-- Dark Mode Toggle Script -->
+  <!-- Simple Dark Mode Toggle -->
   <script>
-    function toggleDarkMode() {
-      const themeLink = document.getElementById('theme-link');
-      if (themeLink.href.includes('vue.css')) {
-        themeLink.href = '//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue-dark.css';
-      } else {
-        themeLink.href = '//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css';
-      }
-    }
+    const toggleDarkMode = () => document.body.classList.toggle('dark');
+    // You can add a button in your markdown: <button onclick="toggleDarkMode()">🌓</button>
   </script>
 </body>
 </html>
