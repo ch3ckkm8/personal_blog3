@@ -9,7 +9,7 @@
 <!-- Docsify default theme -->
 <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
 
-<!-- Prism CSS -->
+<!-- Prism CSS for syntax highlighting -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css">
 
 <style>
@@ -79,7 +79,7 @@ html[data-theme="dark"] #theme-toggle-btn{
 }
 html[data-theme="dark"] h1,h2,h3,h4,h5,h6{ color:#4da6ff; }
 
-/* Fix dark mode code block border */
+/* Dark mode code block border */
 html[data-theme="dark"] pre { border: 1px solid rgba(255,255,255,0.1); }
 </style>
 </head>
@@ -104,7 +104,17 @@ window.$docsify = {
   loadSidebar: true,
   subMaxLevel: 6,
   auto2top: true,
-  search: 'auto'
+  search: 'auto',
+  // Enable Prism syntax highlighting
+  markdown: {
+    highlight: function(code, lang) {
+      if (window.Prism && Prism.languages[lang]) {
+        return Prism.highlight(code, Prism.languages[lang], lang);
+      } else {
+        return code;
+      }
+    }
+  }
 };
 </script>
 
@@ -157,7 +167,7 @@ function buildOutline(attempt=0){
   Prism.highlightAll();
 
   const headers=Array.from(root.querySelectorAll('h1,h2,h3,h4,h5,h6'));
-  if(!headers.length){ if(attempt<50) return setTimeout(()=>buildOutline(attempt+1),50); container.querySelectorAll('a').forEach(a=>a.remove()); const l=container.querySelector('.outline-loading'); if(l) l.textContent='No headings found.'; return; }
+  if(!headers.length){ container.querySelectorAll('a').forEach(a=>a.remove()); const l=container.querySelector('.outline-loading'); if(l) l.textContent='No headings found.'; return; }
 
   container.querySelectorAll('a[data-target]').forEach(a=>a.remove());
   const l=container.querySelector('.outline-loading'); if(l) l.remove();
