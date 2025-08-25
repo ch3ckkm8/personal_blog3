@@ -78,6 +78,9 @@ html[data-theme="dark"] #theme-toggle-btn{
   color: #e6e6e6;
 }
 html[data-theme="dark"] h1,h2,h3,h4,h5,h6{ color:#4da6ff; }
+
+/* Fix dark mode code block border */
+html[data-theme="dark"] pre { border: 1px solid rgba(255,255,255,0.1); }
 </style>
 </head>
 <body>
@@ -143,39 +146,25 @@ window.$docsify = {
   btn.addEventListener('click',()=>setTheme(currentTheme()==='dark'?'light':'dark'));
 })();
 
-// Right-side outline with retry for async Docsify render
+// Right-side outline with retry
 function buildOutline(attempt=0){
   const container=document.getElementById('page-outline');
   if(!container) return;
-
   const root=document.querySelector('.markdown-section');
-  if(!root){
-    if(attempt<50) return setTimeout(()=>buildOutline(attempt+1),50);
-    return;
-  }
+  if(!root){ if(attempt<50) return setTimeout(()=>buildOutline(attempt+1),50); return; }
 
   // Prism highlight
   Prism.highlightAll();
 
   const headers=Array.from(root.querySelectorAll('h1,h2,h3,h4,h5,h6'));
-  if(!headers.length){
-    if(attempt<50) return setTimeout(()=>buildOutline(attempt+1),50);
-    container.querySelectorAll('a').forEach(a=>a.remove());
-    const l=container.querySelector('.outline-loading'); if(l) l.textContent='No headings found.';
-    return;
-  }
+  if(!headers.length){ if(attempt<50) return setTimeout(()=>buildOutline(attempt+1),50); container.querySelectorAll('a').forEach(a=>a.remove()); const l=container.querySelector('.outline-loading'); if(l) l.textContent='No headings found.'; return; }
 
   container.querySelectorAll('a[data-target]').forEach(a=>a.remove());
   const l=container.querySelector('.outline-loading'); if(l) l.remove();
 
   const used=new Set();
   headers.forEach(h=>{
-    if(!h.id){
-      let base=h.textContent.trim().toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-');
-      let uid=base,i=1; while(used.has(uid)||document.getElementById(uid)) uid=base+'-'+(i++);
-      h.id=uid; used.add(uid);
-    } else used.add(h.id);
-
+    if(!h.id){ let base=h.textContent.trim().toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-'); let uid=base,i=1; while(used.has(uid)||document.getElementById(uid)) uid=base+'-'+(i++); h.id=uid; used.add(uid); } else used.add(h.id);
     const level=parseInt(h.tagName.slice(1),10)||1;
     const a=document.createElement('a');
     a.href='javascript:void(0)';
@@ -185,41 +174,18 @@ function buildOutline(attempt=0){
     container.appendChild(a);
   });
 
-  // Click smooth scroll
-  container.onclick=function(e){
-    const a=e.target.closest&&e.target.closest('a[data-target]');
-    if(!a) return; e.preventDefault();
-    const h=document.getElementById(a.getAttribute('data-target'));
-    if(h) h.scrollIntoView({behavior:'smooth',block:'start'});
-    container.querySelectorAll('a').forEach(x=>x.classList.remove('active'));
-    a.classList.add('active');
-  };
+  container.onclick=function(e){ const a=e.target.closest&&e.target.closest('a[data-target]'); if(!a) return; e.preventDefault(); const h=document.getElementById(a.getAttribute('data-target')); if(h) h.scrollIntoView({behavior:'smooth',block:'start'}); container.querySelectorAll('a').forEach(x=>x.classList.remove('active')); a.classList.add('active'); };
 
-  // Intersection observer
   if(window.__outlineIO) window.__outlineIO.disconnect();
   const map={};
   container.querySelectorAll('a[data-target]').forEach(a=>map[a.getAttribute('data-target')]=a);
-  const io=new IntersectionObserver(entries=>{
-    entries.forEach(entry=>{
-      const id=entry.target.id;
-      const link=map[id];
-      if(link&&entry.isIntersecting){
-        container.querySelectorAll('a').forEach(x=>x.classList.remove('active'));
-        link.classList.add('active');
-      }
-    });
-  },{root:null,rootMargin:'0px 0px -65% 0px',threshold:0.05});
+  const io=new IntersectionObserver(entries=>{ entries.forEach(entry=>{ const id=entry.target.id; const link=map[id]; if(link&&entry.isIntersecting){ container.querySelectorAll('a').forEach(x=>x.classList.remove('active')); link.classList.add('active'); } }); },{root:null,rootMargin:'0px 0px -65% 0px',threshold:0.05});
   headers.forEach(h=>io.observe(h));
   window.__outlineIO=io;
 }
 
-// Docsify hook
 window.$docsify.plugins=window.$docsify.plugins||[];
-window.$docsify.plugins=window.$docsify.plugins.concat(function(hook,vm){
-  hook.doneEach(function(){
-    setTimeout(()=>buildOutline(0),60);
-  });
-});
+window.$docsify.plugins=window.$docsify.plugins.concat(function(hook,vm){ hook.doneEach(function(){ setTimeout(()=>buildOutline(0),60); }); });
 window.addEventListener('hashchange',()=>setTimeout(()=>buildOutline(0),80));
 window.addEventListener('load',()=>setTimeout(()=>buildOutline(0),120));
 </script>
