@@ -7,12 +7,8 @@
   <title>Docsify Site</title>
   <meta name="description" content="Docsify with robust dynamic outline (h1-h6), dark mode, and sidebar" />
 
-  <!-- Docsify Vue theme -->
+  <!-- Docsify Vue theme (includes Prism highlighting by default) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
-
-  <!-- Prism themes (light + dark) -->
-  <link id="prism-theme-light" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css" />
-  <link id="prism-theme-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" disabled />
 
   <style>
     /* ---------- Color System (light / dark via CSS vars) ---------- */
@@ -75,12 +71,12 @@
     .markdown-section pre, .markdown-section pre > code {
       background: var(--code-bg) !important;
       border: 1px solid var(--border) !important;
-      /* do NOT override text color → Prism handles syntax colors */
+      /* ❌ don’t override text color — Prism provides colors */
     }
     .markdown-section code:not(pre code) {
       background: var(--code-bg) !important;
       border: 1px solid var(--border) !important;
-      color: var(--text) !important; /* keep inline code styled */
+      color: var(--text) !important; /* inline code keeps theme text */
       padding: 2px 4px;
       border-radius: 4px;
     }
@@ -176,8 +172,6 @@
         const pref = localStorage.getItem('ds_dark');
         if (pref === '1' || (!pref && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
           document.body.classList.add('dark');
-          document.getElementById('prism-theme-light').disabled = true;
-          document.getElementById('prism-theme-dark').disabled = false;
         }
       } catch (e) { /* ignore */ }
     })();
@@ -213,7 +207,7 @@
     });
     backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-    /* Dark mode toggle + Prism theme switch + persist */
+    /* Dark mode toggle + persist */
     (function attachDarkToggle(){
       const btn = document.getElementById('dark-mode-btn');
       const setLabel = () => { btn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌓'; };
@@ -221,25 +215,217 @@
         const isDark = document.body.classList.toggle('dark');
         try { localStorage.setItem('ds_dark', isDark ? '1' : '0'); } catch(e) {}
         setLabel();
-
-        // switch Prism theme
-        document.getElementById('prism-theme-light').disabled = isDark;
-        document.getElementById('prism-theme-dark').disabled = !isDark;
-
         try { buildOutlineOnce(0); } catch(_) {}
       });
       setLabel();
     })();
   </script>
 
-  <!-- (Outline scripts unchanged) -->
+  <!-- Outline builder (full restored version) -->
   <script>
-    /* ---------- Robust outline builder (h1-h6) ---------- */
-    /* ... your existing buildOutlineOnce + observers ... */
+    let outlineObserver = null;
+
+    function slugify(text) {
+      return (text || '').trim().toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+    }
+
+    function isInsideSidebar(node) {
+      return !!node && !!node.closest && !!node.closest('.sidebar');
+    }
+
+    function gatherHeaders() {
+      const candidates = [
+        document.querySelector('.markdown-section'),
+        document.querySelector('.content'),
+        document.querySelector('#main'),
+        document.querySelector('article'),
+        document.querySelector('.main'),
+        document.getElementById('app')
+      ];
+      for (const root of candidates) {
+        if (!root) continue;
+        const hs = Array.from(root.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+        const filtered = hs.filter(h => !isInsideSidebar(h) && !h.closest('#outline'));
+        if (filtered.length) return filtered;
+      }
+      return Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6'))
+        .filter(h => !isInsideSidebar(h) && !h.closest('#outline'));
+    }
+
+    function clearOutlineLinks(container) {
+      container.querySelectorAll('a').forEach(a => a.remove());
+    }
+
+    function currentRouteWithoutHash() {
+      const h = location.hash || '';
+      const s = h.slice(1);
+      return s.split('#')[0] || '';
+    }
+
+    function buildOutlineOnce(attempt = 0) {
+      const container = document.getElementById('outline');
+      if (!container) return;
+
+      container.querySelectorAll('.outline-loading').forEach(n => n.remove());
+      const loading = document.createElement('div'); loading.className = 'outline-loading'; loading.textContent = 'Loading…';
+      container.appendChild(loading);
+
+      const headers = gatherHeaders();
+
+      if (!headers.length) {
+        if (attempt < 40) return setTimeout(() => buildOutlineOnce(attempt + 1), 50);
+        clearOutlineLinks(container);
+        loading.textContent = 'No headings found.';
+        return;
+      }
+
+      clearOutlineLinks(container);
+      loading.remove();
+
+      const usedIds = new Set();
+      const linkEntries = [];
+
+      headers.forEach(h => {
+        const text = (h.textContent || h.innerText || '').trim();
+        if (!text) return;
+
+        if (!h.id) {
+          let base = slugify(text) || 'heading';
+          let uid = base; let i = 1;
+          while (usedIds.has(uid) || document.getElementById(uid)) { uid = base + '-' + (i++); }
+          h.id = uid;
+          usedIds.add(uid);
+        } else {
+          usedIds.add(h.id);
+        }
+
+        const level = Math.min(6, Math.max(1, parseInt(h.tagName.substring(1), 10) || 1));
+        const a = document.createElement('a');
+        a.setAttribute('href', 'javascript:void(0)');
+        a.setAttribute('data-target', h.id);
+        a.setAttribute('data-level', String(level));
+        a.textContent = text;
+        a.style.display = 'block';
+        a.style.marginLeft = (level - 1) * 8 + 'px';
+        container.appendChild(a);
+
+        linkEntries.push({ link: a, header: h });
+      });
+
+      container.onclick = function (e) {
+        const a = e.target.closest && e.target.closest('a[data-target]');
+        if (!a) return;
+        const id = a.getAttribute('data-target');
+        const header = document.getElementById(id);
+        if (!header) return;
+        const route = currentRouteWithoutHash();
+        const newHash = route ? (route + '#' + id) : id;
+        try {
+          const base = location.href.split('#')[0];
+          history.replaceState(null, '', base + '#' + newHash);
+        } catch (_) {}
+        header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        container.querySelectorAll('a').forEach(x => x.classList.remove('active'));
+        a.classList.add('active');
+      };
+
+      if (outlineObserver) outlineObserver.disconnect();
+      const map = {};
+      const observed = [];
+      linkEntries.forEach(item => {
+        map[item.header.id] = item.link;
+        observed.push(item.header);
+      });
+
+      if (!observed.length) return;
+
+      outlineObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const id = entry.target.id;
+          const link = map[id];
+          if (!link) return;
+          if (entry.isIntersecting) {
+            container.querySelectorAll('a').forEach(x => x.classList.remove('active'));
+            link.classList.add('active');
+          }
+        });
+      }, { root: null, rootMargin: '0px 0px -65% 0px', threshold: 0.05 });
+
+      observed.forEach(h => outlineObserver.observe(h));
+
+      setTimeout(() => {
+        const rawHash = (location.hash || '').slice(1);
+        const afterRoute = rawHash.split('#')[1] || rawHash.split('#')[0] || '';
+        if (afterRoute) {
+          const targetLink = map[afterRoute];
+          if (targetLink) { container.querySelectorAll('a').forEach(x => x.classList.remove('active')); targetLink.classList.add('active'); return; }
+        }
+        for (const h of observed) {
+          const r = h.getBoundingClientRect();
+          if (r.top >= 0 && r.top < window.innerHeight * 0.7) {
+            const l = map[h.id];
+            if (l) { container.querySelectorAll('a').forEach(x => x.classList.remove('active')); l.classList.add('active'); break; }
+          }
+        }
+      }, 120);
+    }
+
+    (function injectOutlinePlugin() {
+      const orig = window.$docsify.plugins || [];
+      window.$docsify.plugins = [].concat(orig, function (hook, vm) {
+        hook.doneEach(function () {
+          setTimeout(() => buildOutlineOnce(0), 60);
+        });
+      });
+    })();
+
+    window.addEventListener('hashchange', () => setTimeout(() => buildOutlineOnce(0), 80));
+    window.addEventListener('resize', () => setTimeout(() => buildOutlineOnce(0), 120));
   </script>
+
   <script>
-    /* --- Robust auto-rebuild --- */
-    /* ... unchanged ... */
+    (function enableOutlineAutoRebuild() {
+      if (typeof buildOutlineOnce !== 'function') return;
+
+      function debounce(fn, wait = 80) {
+        let t;
+        return function(...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), wait); };
+      }
+
+      function locateContentRoot() {
+        return document.querySelector('.markdown-section')
+          || document.querySelector('.content')
+          || document.querySelector('#main')
+          || document.querySelector('article')
+          || document.querySelector('.main')
+          || document.getElementById('app');
+      }
+
+      const debouncedBuild = debounce(() => buildOutlineOnce(0), 80);
+
+      const root = locateContentRoot();
+      if (root) {
+        const mo = new MutationObserver(() => debouncedBuild());
+        mo.observe(root, { childList: true, subtree: true, attributes: true });
+        window.__docsify_outline_mo = mo;
+      }
+
+      function attachImageLoadListeners() {
+        const r = locateContentRoot(); if (!r) return;
+        r.querySelectorAll('img').forEach(img => {
+          if (!img._outline_listener) {
+            img.addEventListener('load', debouncedBuild, { once: true });
+            img._outline_listener = true;
+          }
+        });
+      }
+      attachImageLoadListeners();
+      const imgObserver = new MutationObserver(() => attachImageLoadListeners());
+      if (root) imgObserver.observe(root, { childList: true, subtree: true });
+
+      window.addEventListener('load', () => { debouncedBuild(); setTimeout(debouncedBuild, 300); });
+      setTimeout(debouncedBuild, 120);
+    })();
   </script>
 </body>
 </html>
