@@ -55,7 +55,6 @@
     }
     a { color: var(--link); }
 
-    /* Docsify content area */
     .content, .markdown-section {
       background: var(--bg);
       color: var(--text);
@@ -75,7 +74,7 @@
       border: 1px solid var(--border);
     }
 
-    /* ---------- Left Sidebar (make it change on dark mode) ---------- */
+    /* ---------- Left Sidebar (dark-mode aware) ---------- */
     .sidebar {
       background: var(--sidebar-bg);
       color: var(--sidebar-fg);
@@ -142,7 +141,6 @@
       border-left-color: var(--outline-active);
       font-weight: 600;
     }
-
     /* indent by heading level */
     #outline a[data-level="1"] { margin-left: 0; }
     #outline a[data-level="2"] { margin-left: 12px; }
@@ -185,9 +183,8 @@
   <button id="back-to-top-btn" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">⬆️</button>
   <button id="dark-mode-btn" title="Toggle dark mode">🌓</button>
 
-  <!-- Docsify config -->
+  <!-- Init theme from preference -->
   <script>
-    // Persisted dark mode preference
     (function initThemeFromStorage() {
       try {
         const pref = localStorage.getItem('ds_dark');
@@ -196,13 +193,16 @@
         }
       } catch (_) {}
     })();
+  </script>
 
+  <!-- Docsify config -->
+  <script>
     window.$docsify = {
       name: 'Dynamic Docsify Site',
       auto2top: true,
       subMaxLevel: 3,
-      loadSidebar: true,           // required for auto sidebar
-      autoSidebar: true,           // generate sidebar from page headers
+      loadSidebar: true,     // dynamic left sidebar (auto plugin below)
+      autoSidebar: true,
       search: {
         placeholder: 'Type to search',
         noData: 'No matches found',
@@ -215,7 +215,6 @@
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
-  <!-- Auto Sidebar (dynamic left TOC) -->
   <script src="https://cdn.jsdelivr.net/npm/docsify-auto-sidebar/dist/docsify-auto-sidebar.min.js"></script>
 
   <script>
@@ -228,45 +227,59 @@
       });
     })();
 
-    // ----- Right Outline builder -----
+    // ----- Right Outline builder (robust) -----
     let outlineObserver;
 
     function slugify(text) {
-      return text
+      return (text || '')
         .trim()
         .toLowerCase()
         .replace(/[^\w\s-]/g, '')
         .replace(/\s+/g, '-');
     }
 
-    function buildOutline() {
+    function getContentRoot() {
+      // Primary container Docsify uses for rendered markdown
+      return document.querySelector('.markdown-section')
+          || document.querySelector('.content')
+          || document.querySelector('#main');
+    }
+
+    function buildOutlineWithRetry(attempt = 0) {
       const container = document.getElementById('outline');
       if (!container) return;
 
-      // Keep the title, clear previous links
-      container.querySelectorAll('a').forEach(a => a.remove());
-
-      // Docsify renders into .content
-      const content = document.querySelector('.content');
-      if (!content) return;
-
-      const headers = content.querySelectorAll('h1, h2, h3, h4');
-      if (!headers.length) {
-        return; // leave only the title (no sections)
+      const root = getContentRoot();
+      if (!root) {
+        // Wait for Docsify to finish injecting the page
+        if (attempt < 20) return setTimeout(() => buildOutlineWithRetry(attempt + 1), 50);
+        return;
       }
 
+      const headers = root.querySelectorAll('h1, h2, h3, h4');
+      if (!headers.length) {
+        // Sometimes headers arrive a tick later
+        if (attempt < 20) return setTimeout(() => buildOutlineWithRetry(attempt + 1), 50);
+        // No headers: leave just the title
+        container.querySelectorAll('a').forEach(a => a.remove());
+        return;
+      }
+
+      // Clear previous links but keep the title
+      container.querySelectorAll('a').forEach(a => a.remove());
+
       headers.forEach(h => {
-        if (!h.id) h.id = slugify(h.textContent || h.innerText || '');
+        if (!h.id) h.id = slugify(h.textContent || h.innerText);
         const level = parseInt(h.tagName[1], 10);
         const a = document.createElement('a');
         a.setAttribute('href', 'javascript:void(0)');
         a.setAttribute('data-target', h.id);
-        a.setAttribute('data-level', level);
+        a.setAttribute('data-level', String(level));
         a.textContent = h.textContent || h.innerText || '';
         container.appendChild(a);
       });
 
-      // Click -> smooth scroll to header (works in SPA routes)
+      // Click -> smooth scroll
       container.onclick = (e) => {
         const a = e.target.closest('a[data-target]');
         if (!a) return;
@@ -274,7 +287,7 @@
         if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
 
-      // Highlight section in view
+      // Active section highlighting
       if (outlineObserver) outlineObserver.disconnect();
 
       const links = Array.from(container.querySelectorAll('a[data-target]'));
@@ -295,19 +308,17 @@
       }, opts);
 
       headers.forEach(h => outlineObserver.observe(h));
+
+      // Set initial active (top heading)
+      if (links[0]) links[0].classList.add('active');
     }
 
-    // Rebuild outline after each Docsify render
-    window.$docsify = window.$docsify || {};
-    (function injectPlugin() {
-      const origPlugins = window.$docsify.plugins || [];
-      window.$docsify.plugins = [].concat(origPlugins, function (hook, vm) {
+    // Rebuild outline after each Docsify render (SPA navigation)
+    (function injectOutlinePlugin() {
+      const orig = window.$docsify.plugins || [];
+      window.$docsify.plugins = [].concat(orig, function (hook, vm) {
         hook.doneEach(function () {
-          // Ensure headings have ids (Docsify usually adds anchors, but we guard anyway)
-          document.querySelectorAll('.content h1, .content h2, .content h3, .content h4').forEach(h => {
-            if (!h.id) h.id = slugify(h.textContent || h.innerText || '');
-          });
-          buildOutline();
+          buildOutlineWithRetry(0);
         });
       });
     })();
